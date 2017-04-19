@@ -1,0 +1,25 @@
+parameters:
+  config.path: 'config/config.yml'
+  event.listener.config.path: 'config/event.listener.yml'
+
+services:
+  app.logger:
+    class: \SimpleLogger\Stdout
+    
+  app.configuration:
+    class: \PVG\Application\Configuration\ConfigReader
+    arguments:
+      - "@app.file_locator"
+      - "%config.path%"
+      - "%event.listener.config.path%"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+    calls:
+      - method: init
+      
+  deploy_test_branch_command:
+    class: \PVG\Command\DeployTestBranchCommand
+    arguments:
+      - "@=service('app.configuration').get()"
+      - "@app.logger"
+      - "@app.event_dispatcher"

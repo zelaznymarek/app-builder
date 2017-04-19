@@ -1,0 +1,2 @@
+application.initialized:
+   - {service: app.configuration, action: test}
