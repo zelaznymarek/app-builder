@@ -1,0 +1,63 @@
+{
+  "name": "sdudziak/test-branch-builder",
+  "description": "Make your test server workflow friendly",
+  "type": "project",
+  "require": {
+    "sebastian/git": "^2.1",
+    "chobie/jira-api-restclient": "^2.0@dev",
+    "symfony/filesystem": "^3.2",
+    "incenteev/composer-parameter-handler": "^2.1",
+    "symfony/yaml": "^3.2",
+    "symfony/console": "^3.2",
+    "symfony/dependency-injection": "^3.2",
+    "symfony/config": "^3.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "PVG\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PVG\\": "tests/src"
+    }
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Szymon Dudziak",
+      "email": "sz.dudziak@gmail.com"
+    }
+  ],
+  "scripts": {
+    "post-install-cmd": [
+      "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters"
+    ],
+    "post-update-cmd": [
+      "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters"
+    ]
+  },
+  "extra": {
+    "incenteev-parameters": {
+      "file": "config/parameters.yml",
+      "dist-file": "config/parameters.dist.yml",
+      "keep-outdated": true,
+      "env-map": {
+        "jira.host": "JIRA_HOST",
+        "jira.authentication.username": "JIRA_AUTH_USERNAME",
+        "jira.authentication.password": "JIRA_AUTH_PASSWORD",
+        "jira.add.ticket.type.prefix.to.branch": "JIRA_ADD_TICKET_TYPE_TO_BRANCH",
+        "jira.watch.projects": "JIRA_WATCH_PROJECTS",
+        "jira.trigger.deploy.state": "JIRA_TRIGGER_DEPLOY_STATE",
+        "jira.trigger.remove.states": "JIRA_TRIGGER_REMOVE_STATE",
+        "server.username": "SERVER_USERNAME",
+        "server.user.homedir": "SERVER_HOMEDIR",
+        "server.vhost.dir": "SERVER_VHOST_DIR",
+        "server.vhost.dir.public": "SERVER_VHOST_DIR_PUBLIC"
+      }
+    }
+  }
+}
