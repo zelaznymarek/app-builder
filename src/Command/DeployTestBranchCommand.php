@@ -3,7 +3,7 @@
 namespace PVG\Command;
 
 use Psr\Log\LoggerInterface;
-use PVG\Event\ApplicationInitializedEvent;
+use PVG\Event\Application\ApplicationInitializedEvent;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\InputInterface;

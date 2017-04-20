@@ -1,6 +1,7 @@
 parameters:
-  config.path: 'config/config.yml'
-  event.listener.config.path: 'config/event.listener.yml'
+  config.path: "config/config.yml"
+  event.listener.config.path: "config/event.listener.yml"
+  application.config: "@=service('app.configuration').get()"
 
 services:
   app.logger:
@@ -20,6 +21,6 @@ services:
   deploy_test_branch_command:
     class: \PVG\Command\DeployTestBranchCommand
     arguments:
-      - "@=service('app.configuration').get()"
+      - "%application.config%"
       - "@app.logger"
       - "@app.event_dispatcher"
