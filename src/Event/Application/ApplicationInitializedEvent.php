@@ -1,6 +1,6 @@
 <?php
 
-namespace PVG\Event;
+namespace PVG\Event\Application;
 
 use Symfony\Component\EventDispatcher\Event;
 

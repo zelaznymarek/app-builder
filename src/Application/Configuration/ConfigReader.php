@@ -80,11 +80,6 @@ class ConfigReader
         return $this->configArray;
     }
 
-    public function test(Event $event)
-    {
-        $this->logger->alert('Received event!');
-    }
-
     /**
      *
      * @param $path
