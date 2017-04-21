@@ -15,9 +15,9 @@
     ],
     "require": {
         "php": "^7.1",
-        "chobie/jira-api-restclient": "^2.0@dev",
         "fguillot/simpleLogger": "^1.0",
         "incenteev/composer-parameter-handler": "^2.1",
+        "lesstif/php-jira-rest-client": "^1.10",
         "sebastian/git": "^2.1",
         "symfony/config": "^3.2",
         "symfony/console": "^3.2",
