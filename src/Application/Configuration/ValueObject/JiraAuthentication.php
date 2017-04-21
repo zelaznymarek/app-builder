@@ -1,6 +1,8 @@
 <?php
 
-namespace PVG\Application\Configuration\ValueObject;
+declare(strict_types=1);
+
+namespace Pvg\Application\Configuration\ValueObject;
 
 use InvalidArgumentException;
 
@@ -8,21 +10,17 @@ class JiraAuthentication
 {
     /** @var string */
     private $host;
+
     /** @var string */
     private $username;
+
     /** @var string */
     private $password;
 
     /**
-     * JiraAuthentication constructor.
-     *
-     * @param string $host
-     * @param string $username
-     * @param string $password
-     *
      * @throws InvalidArgumentException
      */
-    public function __construct($host, $username, $password)
+    public function __construct(string $host, string $username, string $password)
     {
         $this
             ->setHost($host)
@@ -30,43 +28,29 @@ class JiraAuthentication
             ->setPassword($password);
     }
 
-    /**
-     * @return string
-     */
-    public function host()
+    public function host() : string
     {
         return $this->host;
     }
 
-    /**
-     * @return string
-     */
-    public function username()
+    public function username() : string
     {
         return $this->username;
     }
 
-    /**
-     * @return string
-     */
-    public function password()
+    public function password() : string
     {
         return $this->password;
     }
 
-
-    public static function createFromArray(array $yamlConfigArray)
+    public static function createFromArray(array $yamlConfigArray) : void
     {
-
     }
 
     /**
-     * @param string $host
-     *
-     * @return $this
      * @throws InvalidArgumentException
      */
-    private function setHost($host)
+    private function setHost(string $host) : self
     {
         if (empty($host)) {
             throw new InvalidArgumentException('Empty JIRA host configuration');
@@ -77,12 +61,9 @@ class JiraAuthentication
     }
 
     /**
-     * @param string $username
-     *
-     * @return $this
      * @throws InvalidArgumentException
      */
-    private function setUsername($username)
+    private function setUsername(string $username) : self
     {
         if (empty($host)) {
             throw new InvalidArgumentException('Empty JIRA username configuration');
@@ -93,12 +74,9 @@ class JiraAuthentication
     }
 
     /**
-     * @param string $password
-     *
-     * @return $this
      * @throws InvalidArgumentException
      */
-    private function setPassword($password)
+    private function setPassword(string $password) : self
     {
         if (empty($host)) {
             throw new InvalidArgumentException('Empty JIRA password configuration');
@@ -107,6 +85,4 @@ class JiraAuthentication
 
         return $this;
     }
-
-
 }

@@ -1,56 +1,43 @@
 <?php
 
-namespace PVG\Application\Configuration;
+declare(strict_types=1);
+
+namespace Pvg\Application\Configuration;
 
 use Psr\Log\LoggerInterface;
-use PVG\Application\Configuration\ValueObject\EventListenerConfig;
+use Pvg\Application\Configuration\ValueObject\EventListenerConfig;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
-use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Yaml\Yaml;
 
 class ConfigReader
 {
-    /**
-     * @var FileLocator
-     */
+    /** @var FileLocator */
     private $fileLocator;
-    /**
-     * @var string
-     */
+
+    /** @var string */
     private $configPath;
-    /**
-     * @var
-     */
+
+    /** @var array */
     private $configArray;
-    /**
-     * @var LoggerInterface
-     */
+
+    /** @var LoggerInterface */
     private $logger;
-    /**
-     * @var string
-     */
+
+    /** @var string */
     private $eventListenerConfigPath;
-    /**
-     * @var EventDispatcherInterface
-     */
+
+    /** @var ContainerAwareEventDispatcher */
     private $dispatcher;
 
     /**
-     * Create an global application config from given file
-     *
-     * @param FileLocator                   $fileLocator
-     * @param string                        $applicationConfigPath
-     * @param string                        $eventListenerConfigPath
-     * @param ContainerAwareEventDispatcher $dispatcher
-     * @param LoggerInterface               $logger
+     * Create an global application config from given file.
      */
     public function __construct(
         FileLocator $fileLocator,
-        $applicationConfigPath,
-        $eventListenerConfigPath,
+        string $applicationConfigPath,
+        string $eventListenerConfigPath,
         ContainerAwareEventDispatcher $dispatcher,
         LoggerInterface $logger
     ) {
@@ -61,7 +48,7 @@ class ConfigReader
         $this->dispatcher              = $dispatcher;
     }
 
-    public function init()
+    public function init() : void
     {
         if (empty($this->configArray)) {
             $this->configArray = $this->getYamlFileContent($this->configPath);
@@ -71,7 +58,7 @@ class ConfigReader
         $this->initEventDispatcher(EventListenerConfig::createFromConfigArray($eventListenerConfig));
     }
 
-    public function get()
+    public function get() : array
     {
         if (empty($this->configArray)) {
             throw new InvalidConfigurationException('Invalid configuration: empty');
@@ -81,15 +68,11 @@ class ConfigReader
     }
 
     /**
-     *
-     * @param $path
-     *
-     * @return array
      * @throws \Symfony\Component\Config\Exception\FileLocatorFileNotFoundException
      * @throws \Symfony\Component\Yaml\Exception\ParseException
      * @throws \InvalidArgumentException
      */
-    private function getYamlFileContent($path)
+    private function getYamlFileContent(string $path) : array
     {
         $fullPath = $this->fileLocator->locate($path);
         $this->logger->info('Reading config from {path}', ['path' => $fullPath]);
@@ -102,15 +85,17 @@ class ConfigReader
      *
      * @throws \InvalidArgumentException
      */
-    private function initEventDispatcher(array $eventListenerConfig)
+    private function initEventDispatcher(array $eventListenerConfig) : void
     {
         /** @var EventListenerConfig $singleListenerConfig */
         foreach ($eventListenerConfig as $singleListenerConfig) {
             $this->dispatcher->addListenerService(
-                $singleListenerConfig->event(), [
-                $singleListenerConfig->listenerServiceId(),
-                $singleListenerConfig->action(),
-            ]);
+                $singleListenerConfig->event(),
+                [
+                    $singleListenerConfig->listenerServiceId(),
+                    $singleListenerConfig->action(),
+                ]
+            );
         }
     }
 }
