@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<project name='pvg/test-branch-builder' default='check'>
+
+    <target name='check' depends='phpcs,php-cs-fixer,phpcpd,phpstan,types-checker,phpunit' />
+
+    <target name='fix'>
+        <exec executable='bin/php-cs-fixer' passthru='true' checkreturn='true'>
+            <arg value='fix' />
+            <arg value='--config=tests/.php-cs-fixer.config.php' />
+            <arg path='src' />
+            <arg path='tests' />
+        </exec>
+    </target>
+
+    <target name='phpcs'>
+        <exec executable='bin/phpcs' passthru='true' checkreturn='true'>
+            <arg value='--extensions=php' />
+            <arg value='--ignore=tests/bootstrap.php' />
+            <arg value='--report-full' />
+            <arg value='--standard=PSR2' />
+            <arg path='src' />
+            <arg path='tests' />
+        </exec>
+    </target>
+
+    <target name='php-cs-fixer'>
+        <exec executable='bin/php-cs-fixer' passthru='true' checkreturn='true'>
+            <arg value='fix' />
+            <arg value='--config=tests/.php-cs-fixer.config.php' />
+            <arg value='--dry-run' />
+            <arg value='--diff' />
+            <arg path='src' />
+            <arg path='tests' />
+        </exec>
+    </target>
+
+    <target name='phpcpd'>
+        <exec executable='bin/phpcpd' passthru='true' checkreturn='true'>
+            <arg path='src' />
+        </exec>
+    </target>
+
+    <target name='phpstan'>
+        <exec executable='bin/phpstan' passthru='true' checkreturn='true'>
+            <arg value='analyse' />
+            <arg value='--ansi' />
+            <arg value='--level=5' />
+            <arg path='src' />
+        </exec>
+    </target>
+
+    <target name='types-checker'>
+        <exec executable='bin/types-checker' passthru='true' checkreturn='true'>
+            <arg path='src' />
+            <arg path='tests' />
+        </exec>
+    </target>
+
+    <target name='phpunit'>
+        <exec executable='phpdbg' passthru='true' checkreturn='true'>
+            <arg value='-qrr' />
+            <arg path='vendor/phpunit/phpunit/phpunit' />
+            <arg value='--configuration=tests/phpunit.xml' />
+            <arg value='--repeat=2' />
+        </exec>
+    </target>
+
+</project>
