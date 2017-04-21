@@ -38,7 +38,7 @@
     },
     "autoload": {
         "psr-4": {
-            "PVG\\": "src/"
+            "Pvg\\": "src/"
         }
     },
     "autoload-dev": {
