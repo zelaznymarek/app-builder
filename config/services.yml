@@ -6,9 +6,16 @@ parameters:
 services:
   app.logger:
     class: \SimpleLogger\Stdout
+
+  app.jira_service:
+    class: \Pvg\Application\Jira\ExternalLibraryJiraService
+    arguments:
+      - "%application.config%"
+      - "@app.logger"
+      - "@app.event_dispatcher"
     
   app.configuration:
-    class: \PVG\Application\Configuration\ConfigReader
+    class: \Pvg\Application\Configuration\ConfigReader
     arguments:
       - "@app.file_locator"
       - "%config.path%"
@@ -19,8 +26,9 @@ services:
       - method: init
       
   deploy_test_branch_command:
-    class: \PVG\Command\DeployTestBranchCommand
+    class: \Pvg\Command\DeployTestBranchCommand
     arguments:
       - "%application.config%"
       - "@app.logger"
       - "@app.event_dispatcher"
+

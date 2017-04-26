@@ -1,1 +1,6 @@
 application.initialized:
+  - {service: app.jira_service, action: onApplicationInitialized}
+credentials.validated:
+  - {service: app.jira_service, action: onCredentialsValidated}
+credentials.rejected:
+- {service: app.jira_service, action: onCredentialsRejected}

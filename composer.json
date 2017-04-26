@@ -25,6 +25,8 @@
         "symfony/event-dispatcher": "^3.2",
         "symfony/expression-language": "^3.2",
         "symfony/filesystem": "^3.2",
+        "symfony/property-access": "^3.2",
+        "symfony/serializer": "^3.2",
         "symfony/yaml": "^3.2"
     },
     "require-dev": {
