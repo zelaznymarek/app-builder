@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DeployTestBranchCommand extends Command
 {
-    const NAME = 'app:watch';
+    public const NAME = 'app:watch';
 
     /** @var LoggerInterface */
     private $logger;

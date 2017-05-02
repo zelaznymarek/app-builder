@@ -10,9 +10,22 @@ services:
   app.jira_service:
     class: \Pvg\Application\Jira\ExternalLibraryJiraService
     arguments:
-      - "%application.config%"
+      - "@app.jira_config_factory"
       - "@app.logger"
       - "@app.event_dispatcher"
+      - "@app.query_repository"
+
+  app.query_repository:
+    class: \Pvg\Application\Jira\QueryRepository
+    public: false
+
+  app.jira_config_factory:
+    class: \Pvg\Application\Jira\Factory\JiraConfigFactory
+    arguments:
+      - "%application.config%"
+
+  app.tickets_filter:
+    class: \Pvg\Application\Jira\TicketInfoFilter
     
   app.configuration:
     class: \Pvg\Application\Configuration\ConfigReader

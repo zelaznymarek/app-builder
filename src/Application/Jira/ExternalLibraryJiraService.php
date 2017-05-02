@@ -4,28 +4,21 @@ declare(strict_types=1);
 
 namespace Pvg\Application\Jira;
 
-use JiraRestApi\Configuration\ArrayConfiguration;
 use JiraRestApi\Issue\IssueSearchResult;
 use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Jira\Exception\InvalidJiraStatusException;
+use Pvg\Application\Jira\Factory\JiraConfigFactory;
+use Pvg\Application\Jira\ValueObject\JiraTicketStatus;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
-use Pvg\Event\Application\CredentialsRejectedEvent;
-use Pvg\Event\Application\CredentialsRejectedEventAware;
-use Pvg\Event\Application\CredentialsValidatedEvent;
-use Pvg\Event\Application\CredentialsValidatedEventAware;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Pvg\Event\Application\TicketsFetchedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class ExternalLibraryJiraService implements
     JiraService,
-    ApplicationInitializedEventAware,
-    CredentialsValidatedEventAware,
-    CredentialsRejectedEventAware
+    ApplicationInitializedEventAware
 {
     /** @var IssueService */
     private $jiraService;
@@ -33,153 +26,99 @@ class ExternalLibraryJiraService implements
     /** @var LoggerInterface */
     private $logger;
 
-    /** @var ArrayConfiguration */
-    private $configArray;
-
     /** @var EventDispatcherInterface */
     private $dispatcher;
 
-    /** @var array */
-    private $availableStatuses;
+    /** @var QueryRepository */
+    private $queryRepository;
 
     public function __construct(
-        array $applicationConfig,
+        JiraConfigFactory $jiraConfigFactory,
         LoggerInterface $logger,
-        EventDispatcherInterface $dispatcher
+        EventDispatcherInterface $dispatcher,
+        QueryRepository $queryRepository
     ) {
-        $this->configArray = new ArrayConfiguration([
-                'jiraHost'     => $applicationConfig['parameters']['jira.host'],
-                'jiraUser'     => $applicationConfig['parameters']['jira.authentication.username'],
-                'jiraPassword' => $applicationConfig['parameters']['jira.authentication.password'],
-            ]);
-        $this->jiraService       = new IssueService($this->configArray);
+        $this->jiraService       = new IssueService($jiraConfigFactory->applicationConfig());
         $this->logger            = $logger;
         $this->dispatcher        = $dispatcher;
-        $this->availableStatuses = [
-            'Abgelehnt'         => 'Abgelehnt',
-            'Approved'          => 'Approved',
-            'Backlog'           => 'Backlog',
-            'Cancelled'         => 'Cancelled',
-            'Check finished'    => 'Check finished',
-            'Check in progress' => 'Check in progress',
-            'Check waiting'     => 'Check waiting',
-            'Closed'            => 'Closed',
-            'Done'              => 'Done',
-            'Erledigt'          => 'Erledigt',
-            'Gelöst'            => 'Gelöst',
-            'In Progress'       => 'In Progress',
-            'In Review'         => 'In Review',
-            'Open'              => 'Open',
-            'Rejected'          => 'Rejected',
-        ];
-    }
-
-    /**
-     * Method uses provided credentials to connect JIRA and get information about user.
-     * If succesfull it dispatches an event and returns true. In case credentials are invalid
-     * it catches JiraException, dispatches an event and returns false.
-     */
-    public function login() : bool
-    {
-        $jql = 'assignee  = "marek.zelazny@equiqo.com" ';
-        try {
-            $this->jiraService->search($jql);
-            $this->dispatcher->dispatch(
-                CredentialsValidatedEvent::NAME,
-                new CredentialsValidatedEvent()
-            );
-
-            return true;
-        } catch (JiraException $e) {
-            $this->dispatcher->dispatch(
-                CredentialsRejectedEvent::NAME,
-                new CredentialsRejectedEvent($e)
-            );
-
-            return false;
-        }
+        $this->queryRepository   = $queryRepository;
     }
 
     /**
      * Service connects to JIRA with specified credentials when event occurs.
+     * If connected successfully, fetches all tickets from JIRA.
      */
-    public function onApplicationInitialized(ApplicationInitializedEvent $event) : void
+    public function onApplicationInitialized(ApplicationInitializedEvent $event = null) : void
     {
-        $this->login();
-    }
-
-    /**
-     * Gets tickets with given status when event occurs.
-     */
-    public function onCredentialsValidated(CredentialsValidatedEvent $event) : void
-    {
-        $this->logger->info('Logged to JIRA');
-        $this->getAllIssues([$this->availableStatuses['In Progress']]);
-    }
-
-    /**
-     * Logs error message when event occurs.
-     */
-    public function onCredentialsRejected(CredentialsRejectedEvent $event) : void
-    {
-        $this->logger->info('Login failed \n' . $event->exception()->getMessage());
-    }
-
-    /**
-     * Fetches tickets with passed status, converts into JSON and saves to file.
-     */
-    private function getAllIssues(array $statusArray) : void
-    {
-        foreach ($statusArray as $status) {
-            $jql    = 'status = "' . $status . '"';
-            $issues = $this->sendQuery($jql);
-            $issues = $this->convertToJSON($issues);
-            $this->saveToFile($issues, $status);
+        if ($this->login()) {
+            //$this->fetchAllTickets();
         }
     }
 
     /**
-     * Sends passed JQL query to JIRA and returns its result.
+     * Method uses provided credentials to connect JIRA.
+     * If successful returns true. If credentials are invalid
+     * JiraException is thrown.
      */
-    private function sendQuery(string $jql) : IssueSearchResult
+    public function login() : bool
     {
-        $result = null;
+        $this->jiraService->search($this->queryRepository->validateCredentials());
+
+        return true;
+    }
+
+    /**
+     * Fetches tickets with passed status and dispatches TicketsFetchedEvent with tickets passed.
+     */
+    public function fetchTicketsByStatus(string $status) : void
+    {
         try {
-            $result = $this->jiraService->search($jql, 0, 1000);
+            $tickets = $this->sendQuery(
+                $this->
+                queryRepository->
+                fetchTicketsByStatus((string) JiraTicketStatus::createFromString($status))
+            );
+            $this->dispatchTicketsFetchedEvent($tickets);
+        } catch (InvalidJiraStatusException $e) {
+            $this->logger->info('Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fetches all tickets and dispatches TicketsFetchedEvent with tickets passed.
+     */
+    public function fetchAllTickets() : void
+    {
+        $tickets = $this->sendQuery(
+            $this
+                ->queryRepository
+                ->fetchAllTickets()
+        );
+        $this->dispatchTicketsFetchedEvent($tickets);
+    }
+
+    /**
+     * Sends passed JQL query to JIRA and returns IssueSearchResult object.
+     */
+    private function sendQuery(string $jql) : ?IssueSearchResult
+    {
+        try {
+            return $this->jiraService->search($jql, 0, 10000);
         } catch (JiraException $e) {
             $this->logger->info('Search Failed : ' . $e->getMessage());
         }
 
-        return $result;
+        return null;
     }
 
     /**
-     * Saves given json to file of given filename.
+     * Dispatches TicketsFetchedEvent.
      */
-    private function saveToFile(string $result, string $filename) : void
+    private function dispatchTicketsFetchedEvent(IssueSearchResult $tickets) : void
     {
-        if ($result !== null) {
-            try {
-                $fp = fopen("$filename.json", 'w');
-                fwrite($fp, $result);
-                fclose($fp);
-            } catch (Exception $e) {
-                $this->logger->info("Could not write to file\n" . $e->getMessage());
-            }
-        } else {
-            $this->logger->info('Nothing fetched');
-        }
-    }
-
-    /**
-     * Converts IssueSearchResult object into JSON object.
-     */
-    private function convertToJSON(IssueSearchResult $result) : string
-    {
-        $encoder    = [new JsonEncoder()];
-        $normalizer = [new ObjectNormalizer()];
-        $serializer = new Serializer($normalizer, $encoder);
-
-        return $serializer->serialize($result, 'json');
+        $this->dispatcher->dispatch(
+            TicketsFetchedEvent::NAME,
+            new TicketsFetchedEvent($tickets)
+        );
     }
 }

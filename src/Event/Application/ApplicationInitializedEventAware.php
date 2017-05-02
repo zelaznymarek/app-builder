@@ -6,5 +6,5 @@ namespace Pvg\Event\Application;
 
 interface ApplicationInitializedEventAware
 {
-    public function onApplicationInitialized(ApplicationInitializedEvent $event) : void;
+    public function onApplicationInitialized(ApplicationInitializedEvent $event = null) : void;
 }

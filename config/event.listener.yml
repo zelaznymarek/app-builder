@@ -1,6 +1,4 @@
 application.initialized:
   - {service: app.jira_service, action: onApplicationInitialized}
-credentials.validated:
-  - {service: app.jira_service, action: onCredentialsValidated}
-credentials.rejected:
-- {service: app.jira_service, action: onCredentialsRejected}
+tickets.fetched:
+  - {service: app.tickets_filter, action: onTicketsFetched}
