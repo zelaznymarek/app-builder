@@ -8,7 +8,7 @@ class QueryRepository
 {
     private const VALIDATE_CREDENTIALS_QUERY    = 'createdDate > now()';
     private const FETCH_ALL_TICKETS_QUERY       = '';
-    private const FETCH_TICKETS_BY_STATUS_QUERY = 'status = %s';
+    private const FETCH_TICKETS_BY_STATUS_QUERY = 'status = "%s"';
 
     public function validateCredentials() : string
     {

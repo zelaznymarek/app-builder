@@ -32,6 +32,9 @@ class ExternalLibraryJiraService implements
     /** @var QueryRepository */
     private $queryRepository;
 
+    /** @var int */
+    private const MAX_RESULTS = 500;
+
     public function __construct(
         JiraConfigFactory $jiraConfigFactory,
         LoggerInterface $logger,
@@ -51,7 +54,7 @@ class ExternalLibraryJiraService implements
     public function onApplicationInitialized(ApplicationInitializedEvent $event = null) : void
     {
         if ($this->login()) {
-            //$this->fetchAllTickets();
+            $this->fetchAllTickets();
         }
     }
 
@@ -76,7 +79,7 @@ class ExternalLibraryJiraService implements
             $tickets = $this->sendQuery(
                 $this->
                 queryRepository->
-                fetchTicketsByStatus((string) JiraTicketStatus::createFromString($status))
+                fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
             );
             $this->dispatchTicketsFetchedEvent($tickets);
         } catch (InvalidJiraStatusException $e) {
@@ -103,7 +106,7 @@ class ExternalLibraryJiraService implements
     private function sendQuery(string $jql) : ?IssueSearchResult
     {
         try {
-            return $this->jiraService->search($jql, 0, 10000);
+            return $this->jiraService->search($jql, 0, self::MAX_RESULTS);
         } catch (JiraException $e) {
             $this->logger->info('Search Failed : ' . $e->getMessage());
         }

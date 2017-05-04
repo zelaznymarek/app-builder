@@ -47,7 +47,7 @@ class JiraTicketStatus
 
     public function __construct(string $status)
     {
-        if (!array_key_exists($status, self::ALLOWED_STATUSES)) {
+        if (!in_array($status, self::ALLOWED_STATUSES)) {
             throw new InvalidJiraStatusException("Status $status not found");
         }
         $this->status = $status;
@@ -59,5 +59,10 @@ class JiraTicketStatus
     public static function createFromString(string $status) : self
     {
         return new self($status);
+    }
+
+    public function status() : string
+    {
+        return $this->status;
     }
 }

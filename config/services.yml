@@ -26,6 +26,8 @@ services:
 
   app.tickets_filter:
     class: \Pvg\Application\Jira\TicketInfoFilter
+    arguments:
+      - "@app.logger"
     
   app.configuration:
     class: \Pvg\Application\Configuration\ConfigReader
