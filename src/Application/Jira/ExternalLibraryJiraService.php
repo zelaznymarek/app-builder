@@ -9,7 +9,6 @@ use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Jira\Exception\InvalidJiraStatusException;
-use Pvg\Application\Jira\Factory\JiraConfigFactory;
 use Pvg\Application\Jira\ValueObject\JiraTicketStatus;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
@@ -35,12 +34,12 @@ class ExternalLibraryJiraService implements
     private $queryRepository;
 
     public function __construct(
-        JiraConfigFactory $jiraConfigFactory,
+        IssueService $jiraIssueService,
         LoggerInterface $logger,
         EventDispatcherInterface $dispatcher,
         QueryRepository $queryRepository
     ) {
-        $this->jiraService       = new IssueService($jiraConfigFactory->applicationConfig());
+        $this->jiraService       = $jiraIssueService;
         $this->logger            = $logger;
         $this->dispatcher        = $dispatcher;
         $this->queryRepository   = $queryRepository;

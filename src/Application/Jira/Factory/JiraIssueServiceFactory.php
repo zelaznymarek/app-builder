@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Pvg\Application\Jira\Factory;
 
 use JiraRestApi\Configuration\ArrayConfiguration;
+use JiraRestApi\Issue\IssueService;
 
-class JiraConfigFactory
+class JiraIssueServiceFactory
 {
     /** @var ArrayConfiguration */
     public $applicationConfig;
@@ -20,8 +21,8 @@ class JiraConfigFactory
         ]);
     }
 
-    public function applicationConfig() : ArrayConfiguration
+    public function create() : IssueService
     {
-        return $this->applicationConfig;
+        return new IssueService($this->applicationConfig);
     }
 }

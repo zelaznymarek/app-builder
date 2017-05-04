@@ -7,7 +7,7 @@ namespace Tests\Application\Jira;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Jira\ExternalLibraryJiraService;
-use Pvg\Application\Jira\Factory\JiraConfigFactory;
+use Pvg\Application\Jira\Factory\JiraIssueServiceFactory;
 use Pvg\Application\Jira\QueryRepository;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -16,7 +16,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class ExternalLibraryJiraServiceTest extends TestCase
 {
-    /** @var JiraConfigFactory */
+    /** @var JiraIssueServiceFactory */
     private $jiraConfigFactory;
     /** @var LoggerInterface */
     private $logger;
@@ -29,7 +29,7 @@ class ExternalLibraryJiraServiceTest extends TestCase
 
     public function setUp() : void
     {
-        $this->jiraConfigFactory = $this->createMock(JiraConfigFactory::class);
+        $this->jiraConfigFactory = $this->createMock(JiraIssueServiceFactory::class);
         $this->logger            = $this->createMock(LoggerInterface::class);
         $this->dispatcher        = $this->createMock(EventDispatcherInterface::class);
         $this->queryRepository   = new QueryRepository();

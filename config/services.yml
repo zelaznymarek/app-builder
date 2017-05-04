@@ -10,17 +10,22 @@ services:
   app.jira_service:
     class: \Pvg\Application\Jira\ExternalLibraryJiraService
     arguments:
-      - "@app.jira_config_factory"
+      - "@app.issue_service"
       - "@app.logger"
       - "@app.event_dispatcher"
       - "@app.query_repository"
+
+  app.issue_service:
+    class: JiraRestApi\Issue\IssueService
+    factory: 'app.jira_issue_service_factory:create'
+    public: false
 
   app.query_repository:
     class: \Pvg\Application\Jira\QueryRepository
     public: false
 
-  app.jira_config_factory:
-    class: \Pvg\Application\Jira\Factory\JiraConfigFactory
+  app.jira_issue_service_factory:
+    class: \Pvg\Application\Jira\Factory\JiraIssueServiceFactory
     arguments:
       - "%application.config%"
 
