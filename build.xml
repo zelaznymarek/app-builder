@@ -7,7 +7,7 @@
     <target name='fix'>
         <exec executable='bin/php-cs-fixer' passthru='true' checkreturn='true'>
             <arg value='fix' />
-            <arg value='--config=tests/.php-cs-fixer.config.php' />
+            <arg value='--config=.php-cs-fixer.config.php' />
             <arg path='src' />
             <arg path='tests' />
         </exec>
@@ -16,7 +16,6 @@
     <target name='phpcs'>
         <exec executable='bin/phpcs' passthru='true' checkreturn='true'>
             <arg value='--extensions=php' />
-            <arg value='--ignore=tests/bootstrap.php' />
             <arg value='--report-full' />
             <arg value='--standard=PSR2' />
             <arg path='src' />
@@ -27,7 +26,7 @@
     <target name='php-cs-fixer'>
         <exec executable='bin/php-cs-fixer' passthru='true' checkreturn='true'>
             <arg value='fix' />
-            <arg value='--config=tests/.php-cs-fixer.config.php' />
+            <arg value='--config=.php-cs-fixer.config.php' />
             <arg value='--dry-run' />
             <arg value='--diff' />
             <arg path='src' />
