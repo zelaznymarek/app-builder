@@ -20,6 +20,8 @@ class ExternalLibraryJiraService implements
     JiraService,
     ApplicationInitializedEventAware
 {
+    /** @var int */
+    private const MAX_RESULTS = 500;
     /** @var IssueService */
     private $jiraService;
 
@@ -31,9 +33,6 @@ class ExternalLibraryJiraService implements
 
     /** @var QueryRepository */
     private $queryRepository;
-
-    /** @var int */
-    private const MAX_RESULTS = 500;
 
     public function __construct(
         JiraConfigFactory $jiraConfigFactory,

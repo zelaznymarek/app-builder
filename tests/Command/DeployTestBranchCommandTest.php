@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Command;
 
 use PHPUnit\Framework\TestCase;
@@ -7,6 +9,9 @@ use Psr\Log\LoggerInterface;
 use Pvg\Command\DeployTestBranchCommand;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @coversNothing
+ */
 class DeployTestBranchCommandTest extends TestCase
 {
     /** @var LoggerInterface */
@@ -21,15 +26,15 @@ class DeployTestBranchCommandTest extends TestCase
     /** @var DeployTestBranchCommand */
     private $deployTestBranchCommand;
 
-    public function setUp()
+    public function setUp() : void
     {
-        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->logger      = $this->createMock(LoggerInterface::class);
         $this->configArray = [
-            'host' => 'host',
+            'host'     => 'host',
             'username' => 'user',
-            'password' => 'pass'
+            'password' => 'pass',
         ];
-        $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $this->dispatcher              = $this->createMock(EventDispatcherInterface::class);
         $this->deployTestBranchCommand = new DeployTestBranchCommand(
             $this->configArray,
             $this->logger,
@@ -40,5 +45,4 @@ class DeployTestBranchCommandTest extends TestCase
     {
         $this->assertInstanceOf(DeployTestBranchCommand::class, $this->deployTestBranchCommand);
     }
-
 }

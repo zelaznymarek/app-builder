@@ -15,7 +15,7 @@ class EventListenerConfigTest extends TestCase
     /** @var EventListenerConfig */
     private $config;
 
-    public function setUp()
+    public function setUp() : void
     {
         $this->config = new EventListenerConfig('an-event', 'a-service', 'do-something');
     }
@@ -33,18 +33,17 @@ class EventListenerConfigTest extends TestCase
             'some_event' => [
                 'some_listener' => [
                     'priority' => 1,
-                    'service' => 'some_service',
-                    'action' => 'some_action'
-                ]
-            ]
+                    'service'  => 'some_service',
+                    'action'   => 'some_action',
+                ],
+            ],
         ];
         $result = EventListenerConfig::createFromConfigArray($array);
 
-        foreach($result as $event)
-        {
-            $this->assertEquals($event->event(), key($array));
-            $this->assertEquals($event->action(), $array['some_event']['some_listener']['action']);
-            $this->assertEquals($event->priority(), $array['some_event']['some_listener']['priority']);
+        foreach ($result as $event) {
+            $this->assertSame($event->event(), key($array));
+            $this->assertSame($event->action(), $array['some_event']['some_listener']['action']);
+            $this->assertSame($event->priority(), $array['some_event']['some_listener']['priority']);
         }
     }
 }

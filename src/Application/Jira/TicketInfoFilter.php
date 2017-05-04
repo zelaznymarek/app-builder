@@ -36,19 +36,18 @@ class TicketInfoFilter implements TicketsFetchedEventAware
 
     private function filterTickets() : void
     {
-            $ticketsArray = null;
-            foreach ($this->tickets->issues as $ticket) {
-                $ticketsArray[$ticket->key] = [
+        $ticketsArray = null;
+        foreach ($this->tickets->issues as $ticket) {
+            $ticketsArray[$ticket->key] = [
                     'Ticket name'  => $ticket->key,
                     'Project name' => $ticket->fields->project->name,
                     'Summary'      => $ticket->fields->summary,
                     'Description'  => $ticket->fields->description,
                     'Status'       => $ticket->fields->status->name,
                 ];
-            }
-            $ticketsArray = $this->convertToJSON($ticketsArray);
-            $this->saveToFile($ticketsArray, 'tickets '.date('Y-n-j', time()));
-
+        }
+        $ticketsArray = $this->convertToJSON($ticketsArray);
+        $this->saveToFile($ticketsArray, 'tickets ' . date('Y-n-j', time()));
     }
 
     /**
@@ -70,15 +69,15 @@ class TicketInfoFilter implements TicketsFetchedEventAware
 
     /**
      * Converts filtered IssueSearchResult object into JSON object.
+     *
      * @throws EmptyArrayException
      */
     private function convertToJSON(array $result) : string
     {
-        if($result === null)
-        {
+        if ($result === null) {
             throw new EmptyArrayException('Is seems no tickets were fetched.');
         }
-        $encoder = [new JsonEncoder()];
+        $encoder    = [new JsonEncoder()];
         $normalizer = [new ObjectNormalizer()];
         $serializer = new Serializer($normalizer, $encoder);
 
