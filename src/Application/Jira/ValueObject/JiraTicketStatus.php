@@ -8,21 +8,21 @@ use Pvg\Application\Jira\Exception\InvalidJiraStatusException;
 
 class JiraTicketStatus
 {
-    public const ABGELEHNT         = 'Abgelehnt';
-    public const APPROVED          = 'Approved';
-    public const BACKLOG           = 'Backlog';
-    public const CANCELLED         = 'Cancelled';
-    public const CHECK_FINISHED    = 'Check finished';
-    public const CHECK_IN_PROGRESS = 'Check in progress';
-    public const CHECK_WAITING     = 'Check waiting';
-    public const CLOSED            = 'Closed';
-    public const DONE              = 'Done';
-    public const ERLEDIGT          = 'Erledigt';
-    public const GELOST            = 'Gelöst';
-    public const IN_PROGRESS       = 'In Progress';
-    public const IN_REVIEW         = 'In Review';
-    public const OPEN              = 'Open';
-    public const REJECTED          = 'Rejected';
+    private const ABGELEHNT         = 'Abgelehnt';
+    private const APPROVED          = 'Approved';
+    private const BACKLOG           = 'Backlog';
+    private const CANCELLED         = 'Cancelled';
+    private const CHECK_FINISHED    = 'Check finished';
+    private const CHECK_IN_PROGRESS = 'Check in progress';
+    private const CHECK_WAITING     = 'Check waiting';
+    private const CLOSED            = 'Closed';
+    private const DONE              = 'Done';
+    private const ERLEDIGT          = 'Erledigt';
+    private const GELOST            = 'Gelöst';
+    private const IN_PROGRESS       = 'In Progress';
+    private const IN_REVIEW         = 'In Review';
+    private const OPEN              = 'Open';
+    private const REJECTED          = 'Rejected';
 
     private const ALLOWED_STATUSES = [
         self::ABGELEHNT,

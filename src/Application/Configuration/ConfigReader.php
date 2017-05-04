@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pvg\Application\Configuration;
 
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\EventListenerConfig;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;

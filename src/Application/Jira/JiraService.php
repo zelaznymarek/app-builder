@@ -6,6 +6,9 @@ namespace Pvg\Application\Jira;
 
 interface JiraService
 {
+    /**
+     * Returns true if credentials are validated successfully. Throws exception if not.
+     */
     public function login() : bool;
 
     /**

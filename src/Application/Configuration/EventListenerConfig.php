@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pvg\Application\Configuration\ValueObject;
+namespace Pvg\Application\Configuration;
 
 class EventListenerConfig
 {

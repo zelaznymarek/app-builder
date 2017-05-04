@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Application\Configuration\ValueObject;
+namespace Tests\Application\Configuration;
 
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Configuration\ValueObject\EventListenerConfig;
+use Pvg\Application\Configuration\EventListenerConfig;
 
 /**
- * @covers \Pvg\Application\Configuration\ValueObject\EventListenerConfig
+ * @covers \Pvg\Application\Configuration\EventListenerConfig
  */
 class EventListenerConfigTest extends TestCase
 {
