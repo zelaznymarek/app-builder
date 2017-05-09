@@ -12,7 +12,10 @@ use Pvg\Application\Configuration\JiraAuthentication;
  */
 class JiraAuthenticationTest extends TestCase
 {
-    public function testCreatingCorrect() : void
+    /**
+     * @test
+     */
+    public function creatingCorrect() : void
     {
         $credentials = new JiraAuthentication('host', 'username', 'password');
 

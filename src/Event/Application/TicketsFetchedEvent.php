@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pvg\Event\Application;
 
-use JiraRestApi\Issue\IssueSearchResult;
 use Symfony\Component\EventDispatcher\Event;
 
 class TicketsFetchedEvent extends Event
@@ -12,15 +11,15 @@ class TicketsFetchedEvent extends Event
     /** @var string */
     public const NAME = 'tickets.fetched';
 
-    /** @var IssueSearchResult */
+    /** @var array */
     private $tickets;
 
-    public function __construct(IssueSearchResult $tickets)
+    public function __construct(array $tickets)
     {
         $this->tickets = $tickets;
     }
 
-    public function tickets() : IssueSearchResult
+    public function tickets() : array
     {
         return $this->tickets;
     }

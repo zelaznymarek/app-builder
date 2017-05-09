@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Pvg\Application\Utils\Mapper;
+
+use Closure;
+use Symfony\Component\Config\Definition\Exception\UnsetKeyException;
+
+class FieldMapper implements Mapper
+{
+    /** @var string */
+    private $key;
+
+    /** @var string */
+    private $outputKey;
+
+    /** @var Closure */
+    private $closure;
+
+    public function __construct(string $key, Closure $closure, string $outputKey = '')
+    {
+        if ($outputKey === '') {
+            $this->outputKey = $key;
+        } else {
+            $this->outputKey = $outputKey;
+        }
+        $this->key     = $key;
+        $this->closure = $closure;
+    }
+
+    public function key() : string
+    {
+        return $this->key;
+    }
+
+    public function outputKey() : string
+    {
+        return $this->outputKey;
+    }
+
+    /**
+     * Returns associative array with mapped data and context.
+     *
+     * @throws UnsetKeyException if key from data array is not found
+     */
+    public function map(array $data, array $context = [])
+    {
+        if (!array_key_exists($this->key, $data)) {
+            throw new UnsetKeyException('Key = ' . $this->key . ' not found.');
+        }
+
+        return ($this->closure)($data[$this->key], $context ?? $data);
+    }
+}

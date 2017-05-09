@@ -7,32 +7,27 @@ services:
   app.logger:
     class: \SimpleLogger\Stdout
 
-  app.jira_service:
-    class: \Pvg\Application\Jira\ExternalLibraryJiraService
-    arguments:
-      - "@app.issue_service"
-      - "@app.logger"
-      - "@app.event_dispatcher"
-      - "@app.query_repository"
-
-  app.issue_service:
-    class: JiraRestApi\Issue\IssueService
-    factory: 'app.jira_issue_service_factory:create'
-    public: false
-
   app.query_repository:
-    class: \Pvg\Application\Jira\QueryRepository
+    class: \Pvg\Application\Module\Jira\QueryRepository
     public: false
 
-  app.jira_issue_service_factory:
-    class: \Pvg\Application\Jira\Factory\JiraIssueServiceFactory
-    arguments:
-      - "%application.config%"
+  app.jira_service_factory:
+    class: \Pvg\Application\Module\Jira\Factory\JiraServiceFactory
+    public: false
 
-  app.tickets_filter:
-    class: \Pvg\Application\Jira\TicketInfoFilter
-    arguments:
-      - "@app.logger"
+  app.jira_service:
+    class: \Pvg\Application\Module\Jira\ExternalLibraryJiraService
+    factory: 'app.jira_service_factory:create'
+    arguments: ["%application.config%",
+                "@app.event_dispatcher",
+                "@app.logger",
+                "@app.query_repository"]
+
+  app.ticket_cache:
+    class: \Pvg\Application\Module\Jira\TicketCache
+    factory: ['Pvg\Application\Jira\Factory\FilesystemAdapterFactory', create]
+    arguments: ["@app.logger"]
+
     
   app.configuration:
     class: \Pvg\Application\Configuration\ConfigReader

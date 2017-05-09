@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Pvg\Application\Jira;
+namespace Pvg\Application\Module\Jira;
 
 use JiraRestApi\Issue\IssueSearchResult;
 use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Jira\Exception\InvalidJiraStatusException;
-use Pvg\Application\Jira\ValueObject\JiraTicketStatus;
+use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
+use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
 use Pvg\Event\Application\TicketsFetchedEvent;
@@ -20,7 +20,8 @@ class ExternalLibraryJiraService implements
     ApplicationInitializedEventAware
 {
     /** @var int */
-    private const MAX_RESULTS = 500;
+    private const MAX_RESULTS = 200;
+
     /** @var IssueService */
     private $jiraService;
 
@@ -79,7 +80,8 @@ class ExternalLibraryJiraService implements
                 queryRepository->
                 fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
             );
-            $this->dispatchTicketsFetchedEvent($tickets);
+            $ticketsArray = $this->mapToJiraTicket($tickets);
+            $this->dispatchTicketsFetchedEvent($ticketsArray);
         } catch (InvalidJiraStatusException $e) {
             $this->logger->info('Error: ' . $e->getMessage());
         }
@@ -95,7 +97,10 @@ class ExternalLibraryJiraService implements
                 ->queryRepository
                 ->fetchAllTickets()
         );
-        $this->dispatchTicketsFetchedEvent($tickets);
+
+        $ticketsArray = $this->mapToJiraTicket($tickets);
+
+        $this->dispatchTicketsFetchedEvent($ticketsArray);
     }
 
     /**
@@ -115,11 +120,21 @@ class ExternalLibraryJiraService implements
     /**
      * Dispatches TicketsFetchedEvent.
      */
-    private function dispatchTicketsFetchedEvent(IssueSearchResult $tickets) : void
+    private function dispatchTicketsFetchedEvent(array $tickets) : void
     {
         $this->dispatcher->dispatch(
             TicketsFetchedEvent::NAME,
             new TicketsFetchedEvent($tickets)
         );
+    }
+
+    /**
+     * Maps IssueSearchResult to JiraTicket object.
+     * Unfinished method.
+     */
+    private function mapToJiraTicket(IssueSearchResult $tickets) : array
+    {
+        foreach ($tickets->issues as $ticket) {
+        }
     }
 }

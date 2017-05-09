@@ -1,4 +1,4 @@
 application.initialized:
   - {service: app.jira_service, action: onApplicationInitialized}
 tickets.fetched:
-  - {service: app.tickets_filter, action: onTicketsFetched}
+  - {service: app.ticket_cache, action: onTicketsFetched}

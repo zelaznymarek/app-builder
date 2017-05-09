@@ -41,7 +41,10 @@ class DeployTestBranchCommandTest extends TestCase
             $this->dispatcher);
     }
 
-    public function testCreatingCorrect() : void
+    /**
+     * @test
+     */
+    public function creatingCorrect() : void
     {
         $this->assertInstanceOf(DeployTestBranchCommand::class, $this->deployTestBranchCommand);
     }
