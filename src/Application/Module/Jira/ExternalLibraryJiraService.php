@@ -10,17 +10,20 @@ use JiraRestApi\JiraException;
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
 use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
+use Pvg\Application\Utils\Mapper\JiraMapperCreator;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
 use Pvg\Event\Application\TicketsFetchedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 
 class ExternalLibraryJiraService implements
     JiraService,
     ApplicationInitializedEventAware
 {
     /** @var int */
-    private const MAX_RESULTS = 200;
+    private const MAX_RESULTS = 100;
 
     /** @var IssueService */
     private $jiraService;
@@ -80,8 +83,11 @@ class ExternalLibraryJiraService implements
                 queryRepository->
                 fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
             );
-            $ticketsArray = $this->mapToJiraTicket($tickets);
-            $this->dispatchTicketsFetchedEvent($ticketsArray);
+            $this->dispatchTicketsFetchedEvent(
+                $this->mapToJiraTicket(
+                    $this->issueSearchResultToArray($tickets)
+                )
+            );
         } catch (InvalidJiraStatusException $e) {
             $this->logger->info('Error: ' . $e->getMessage());
         }
@@ -97,10 +103,38 @@ class ExternalLibraryJiraService implements
                 ->queryRepository
                 ->fetchAllTickets()
         );
+        $ticketsArray  = $this->issueSearchResultToArray($tickets);
+        $mappedTickets = $this->mapToJiraTicket($ticketsArray);
+        $this->dispatchTicketsFetchedEvent($mappedTickets);
+        $this->saveToFile(json_encode($mappedTickets), 'mappedTickets');
+    }
 
-        $ticketsArray = $this->mapToJiraTicket($tickets);
+    /**
+     * Maps IssueSearchResult to JiraTicket object.
+     * This method probably will be moved to separate class.
+     */
+    public function mapToJiraTicket(array $tickets) : array
+    {
+        $mappedTickets = [];
+        $jiraTickets   = [];
+        foreach ($tickets as $key => $value) {
+            $jiraTickets[$key] = JiraMapperCreator::createMapper();
+            foreach ($jiraTickets[$key] as $mapper) {
+                $mappedTickets[$key][$mapper->outputKey()] = $mapper->map($value);
+            }
+        }
 
-        $this->dispatchTicketsFetchedEvent($ticketsArray);
+        return $mappedTickets;
+    }
+
+    private function issueSearchResultToArray(IssueSearchResult $isr) : array
+    {
+        $ticketsArray = [];
+        foreach ($isr->issues as $issue) {
+            $ticketsArray[$issue->key] = json_decode(json_encode($issue), true);
+        }
+
+        return $ticketsArray;
     }
 
     /**
@@ -128,13 +162,19 @@ class ExternalLibraryJiraService implements
         );
     }
 
-    /**
-     * Maps IssueSearchResult to JiraTicket object.
-     * Unfinished method.
-     */
-    private function mapToJiraTicket(IssueSearchResult $tickets) : array
+    /*************** FOR EASIER DEVELOPMENT ONLY, PLEASE DON'T HATE IT ***************/
+
+    private function saveToFile(string $result, string $filename) : void
     {
-        foreach ($tickets->issues as $ticket) {
+        if ($result !== null) {
+            $fs = new Filesystem();
+            try {
+                $fs->dumpFile("/home/maro/$filename.json", $result);
+            } catch (IOException $e) {
+                $this->logger->info("Could not write to file\n" . $e->getMessage());
+            }
+        } else {
+            $this->logger->info('Nothing fetched');
         }
     }
 }

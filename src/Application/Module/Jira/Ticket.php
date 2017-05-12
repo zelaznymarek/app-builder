@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pvg\Application\Module\Jira;
 
-class JiraTicket
+class Ticket
 {
     /** @var string */
     private $assigneeName;

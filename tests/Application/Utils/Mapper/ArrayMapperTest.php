@@ -7,7 +7,6 @@ namespace Tests\Application\Utils\Mapper;
 use PHPUnit\Framework\TestCase;
 use Pvg\Application\Utils\Mapper\ArrayMapper;
 use Pvg\Application\Utils\Mapper\FieldMapper;
-use Symfony\Component\Config\Definition\Exception\UnsetKeyException;
 
 /**
  * @coversNothing
@@ -21,19 +20,22 @@ class ArrayMapperTest extends TestCase
     {
         $mappers = [
             new FieldMapper('name', function ($data) {
-                return (string) $data;
+                return $data;
             }),
             new FieldMapper('email', function ($data) {
-                return (string) $data;
+                return $data;
             }),
             new FieldMapper('id', function ($data) {
                 return (int) $data;
             }),
             new FieldMapper('isActive', function ($data) {
-                return (bool) $data;
+                return $data;
             }),
+            new FieldMapper('displayName', function ($data) {
+                return $data;
+            }, 'display_name'),
         ];
-        $this->arrayMapper = new ArrayMapper('assignee', $mappers);
+        $this->arrayMapper = new ArrayMapper('IN-4', $mappers);
     }
 
     /**
@@ -46,41 +48,25 @@ class ArrayMapperTest extends TestCase
         $this->assertSame(12, $this->arrayMapper->map($data)['id']);
         $this->assertSame('marek', $this->arrayMapper->map($data)['name']);
         $this->assertSame('marek@gmail.com', $this->arrayMapper->map($data)['email']);
-        $this->arrayMapper->map($data);
-    }
+        $this->assertSame('', $this->arrayMapper->map($data)['display_name']);
 
-    /**
-     * @test
-     * @dataProvider missingIdDataProvider
-     */
-    public function mapWithMissingId(array $data) : void
-    {
-        $this->expectException(UnsetKeyException::class);
         $this->arrayMapper->map($data);
     }
 
     public function correctDataProvider() : array
     {
         return [
-          'data1' => [[
-              'name'     => 'marek',
-              'email'    => 'marek@gmail.com',
-              'isActive' => true,
-              'id'       => 12,
-              'someKey'  => 'someValue',
-          ]],
-        ];
-    }
-
-    public function missingIdDataProvider() : array
-    {
-        return [
-            'data1' => [[
-                'name'     => 'marek',
-                'email'    => 'marek@gmail.com',
-                'isActive' => true,
-                'someKey'  => 'someValue',
-            ]],
+            'data1' => [
+                'array' => [
+                    'IN-4' => [
+                        'name'        => 'marek',
+                        'id'          => 12,
+                        'email'       => 'marek@gmail.com',
+                        'isActive'    => true,
+                        'displayName' => '',
+                    ],
+                ],
+            ],
         ];
     }
 }

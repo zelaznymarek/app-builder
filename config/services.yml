@@ -25,7 +25,7 @@ services:
 
   app.ticket_cache:
     class: \Pvg\Application\Module\Jira\TicketCache
-    factory: ['Pvg\Application\Jira\Factory\FilesystemAdapterFactory', create]
+    factory: ['Pvg\Application\Module\Jira\Factory\FilesystemAdapterFactory', create]
     arguments: ["@app.logger"]
 
     

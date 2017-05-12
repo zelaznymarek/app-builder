@@ -47,17 +47,17 @@ class FieldMapperTest extends TestCase
         $this->assertSame(true, $fieldMapper->map($data));
     }
 
-    /**
-     * @test
-     * @dataProvider undefinedKeyDataProvider
-     */
-    public function mapWithIncorrectKey(string $key, Closure $closure, string $outputKey, array $data) : void
-    {
-        $fieldMapper = new FieldMapper($key, $closure, $outputKey);
-
-        $this->expectException(UnsetKeyException::class);
-        $fieldMapper->map($data);
-    }
+//    /**
+//     * @test
+//     * @dataProvider undefinedKeyDataProvider
+//     */
+//    public function mapWithIncorrectKey(string $key, Closure $closure, string $outputKey, array $data) : void
+//    {
+//        $fieldMapper = new FieldMapper($key, $closure, $outputKey);
+//
+//        $this->expectException(UnsetKeyException::class);
+//        $fieldMapper->map($data);
+//    }
 
     /*************************** DATA PROVIDERS **********************************************/
 

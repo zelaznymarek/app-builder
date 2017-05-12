@@ -17,7 +17,7 @@ class QueryRepository
                                                               "Check finished", 
                                                               Abgelehnt, 
                                                               Gelöst, 
-                                                              Erledigt) ';
+                                                              Erledigt) ORDER BY key ASC';
 
     private const FETCH_TICKETS_BY_STATUS_QUERY = 'status = "%s"';
     private const FETCH_PARTICULAR_TICKET       = 'key = %s';

@@ -47,7 +47,7 @@ class FieldMapper implements Mapper
     public function map(array $data, array $context = [])
     {
         if (!array_key_exists($this->key, $data)) {
-            throw new UnsetKeyException('Key = ' . $this->key . ' not found.');
+            return '';
         }
 
         return ($this->closure)($data[$this->key], $context ?? $data);
