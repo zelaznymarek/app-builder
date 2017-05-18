@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pvg\Application\Utils\Mapper;
 
 use Closure;
-use Symfony\Component\Config\Definition\Exception\UnsetKeyException;
 
 class FieldMapper implements Mapper
 {
@@ -41,8 +40,6 @@ class FieldMapper implements Mapper
 
     /**
      * Returns associative array with mapped data and context.
-     *
-     * @throws UnsetKeyException if key from data array is not found
      */
     public function map(array $data, array $context = [])
     {

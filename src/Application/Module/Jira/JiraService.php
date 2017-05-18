@@ -9,7 +9,7 @@ interface JiraService
     /**
      * Returns true if credentials are validated successfully. Throws exception if not.
      */
-    public function login() : bool;
+    public function validateCredentials() : bool;
 
     /**
      *  Method fetches tickets with given status and dispatches event.

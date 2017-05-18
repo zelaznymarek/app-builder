@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Pvg\Application\Configuration\JiraAuthentication;
 
 /**
- * @coversNothing
+ * @covers \Pvg\Application\Configuration\JiraAuthentication
  */
 class JiraAuthenticationTest extends TestCase
 {

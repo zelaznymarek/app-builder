@@ -34,11 +34,23 @@ class JiraMapperCreator
             new ArrayMapper('fields', [
                 new ArrayMapper('assignee', [
                     new FieldMapper('name', $stringClosure),
+                ]),
+            ], 'assignee_name'),
+            new ArrayMapper('fields', [
+                new ArrayMapper('assignee', [
                     new FieldMapper('emailAddress', $stringClosure, 'email'),
+                ]),
+            ], 'assignee_email'),
+            new ArrayMapper('fields', [
+                new ArrayMapper('assignee', [
                     new FieldMapper('displayName', $stringClosure, 'display_name'),
+                ]),
+            ], 'assignee_display_name'),
+            new ArrayMapper('fields', [
+                new ArrayMapper('assignee', [
                     new FieldMapper('active', $boolClosure),
                 ]),
-            ], 'assignee'),
+            ], 'assignee_active'),
             new ArrayMapper('fields', [
                 new ArrayMapper('status', [
                     new FieldMapper('name', $stringClosure, 'status'),

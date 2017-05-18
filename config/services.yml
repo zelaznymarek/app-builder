@@ -23,12 +23,6 @@ services:
                 "@app.logger",
                 "@app.query_repository"]
 
-  app.ticket_cache:
-    class: \Pvg\Application\Module\Jira\TicketCache
-    factory: ['Pvg\Application\Module\Jira\Factory\FilesystemAdapterFactory', create]
-    arguments: ["@app.logger"]
-
-    
   app.configuration:
     class: \Pvg\Application\Configuration\ConfigReader
     arguments:

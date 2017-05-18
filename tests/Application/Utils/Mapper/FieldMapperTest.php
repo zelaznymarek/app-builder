@@ -7,10 +7,9 @@ namespace Tests\Application\Utils\Mapper;
 use Closure;
 use PHPUnit\Framework\TestCase;
 use Pvg\Application\Utils\Mapper\FieldMapper;
-use Symfony\Component\Config\Definition\Exception\UnsetKeyException;
 
 /**
- * @coversNothing
+ * @covers \Pvg\Application\Utils\Mapper\FieldMapper
  */
 class FieldMapperTest extends TestCase
 {
@@ -18,8 +17,12 @@ class FieldMapperTest extends TestCase
      * @test
      * @dataProvider intClosureProvider
      */
-    public function mapWithCorrectIntData(string $key, Closure $closure, string $outputKey, array $data) : void
-    {
+    public function mapWithCorrectIntData(
+        string $key,
+        Closure $closure,
+        string $outputKey,
+        array $data
+    ) : void {
         $fieldMapper = new FieldMapper($key, $closure, $outputKey);
 
         $this->assertSame(123, $fieldMapper->map($data));
@@ -29,8 +32,12 @@ class FieldMapperTest extends TestCase
      * @test
      * @dataProvider stringClosureProvider
      */
-    public function mapWithCorrectStringData(string $key, Closure $closure, string $outputKey, array $data) : void
-    {
+    public function mapWithCorrectStringData(
+        string $key,
+        Closure $closure,
+        string $outputKey,
+        array $data
+    ) : void {
         $fieldMapper = new FieldMapper($key, $closure, $outputKey);
 
         $this->assertSame('marek', $fieldMapper->map($data));
@@ -40,24 +47,16 @@ class FieldMapperTest extends TestCase
      * @test
      * @dataProvider boolClosureProvider
      */
-    public function mapWithCorrectBoolData(string $key, Closure $closure, string $outputKey, array $data) : void
-    {
+    public function mapWithCorrectBoolData(
+        string $key,
+        Closure $closure,
+        string $outputKey,
+        array $data
+    ) : void {
         $fieldMapper = new FieldMapper($key, $closure, $outputKey);
 
         $this->assertSame(true, $fieldMapper->map($data));
     }
-
-//    /**
-//     * @test
-//     * @dataProvider undefinedKeyDataProvider
-//     */
-//    public function mapWithIncorrectKey(string $key, Closure $closure, string $outputKey, array $data) : void
-//    {
-//        $fieldMapper = new FieldMapper($key, $closure, $outputKey);
-//
-//        $this->expectException(UnsetKeyException::class);
-//        $fieldMapper->map($data);
-//    }
 
     /*************************** DATA PROVIDERS **********************************************/
 
@@ -126,29 +125,6 @@ class FieldMapperTest extends TestCase
                 $closure,
                 'isActive',
                 $data = ['active' => true],
-            ],
-        ];
-    }
-
-    public function undefinedKeyDataProvider() : array
-    {
-        /** @var Closure */
-        $closure = function ($data) : string {
-            return (string) $data;
-        };
-
-        return [
-            'not existing key given 1' => [
-                'aaaaa',
-                $closure,
-                'Username',
-                $data = ['name' => 'marek'],
-            ],
-            'not existing key given 2' => [
-                'idi',
-                $closure,
-                '',
-                $data = ['id' => '5'],
             ],
         ];
     }

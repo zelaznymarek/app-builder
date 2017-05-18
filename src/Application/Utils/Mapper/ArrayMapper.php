@@ -50,15 +50,16 @@ class ArrayMapper implements Mapper
      *
      * @throws UnsetKeyException
      */
-    public function map(array $passedData, array $context = []) : array
+    public function map(array $passedData, array $context = [])
     {
         $data   = $passedData[$this->key];
         $result = [];
         foreach ($this->mappers as $mapper) {
+            $this->outputKey = $mapper->outputKey();
             if (!array_key_exists($mapper->key(), $data)) {
-                $result[$mapper->outputKey()] = '';
+                $result = '';
             } else {
-                $result[$mapper->outputKey()] = $mapper->map($data, $context ?: $data);
+                $result = $mapper->map($data, $context ?: $data);
             }
         }
 

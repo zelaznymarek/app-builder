@@ -23,16 +23,6 @@ class EventListenerConfigTest extends TestCase
     /**
      * @test
      */
-    public function creatingCorrect() : void
-    {
-        $config = new EventListenerConfig('an-event', 'a-service', 'do-something');
-
-        $this->assertInstanceOf(EventListenerConfig::class, $config);
-    }
-
-    /**
-     * @test
-     */
     public function createFromConfigArray() : void
     {
         $array = [

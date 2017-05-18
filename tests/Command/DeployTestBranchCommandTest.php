@@ -10,7 +10,7 @@ use Pvg\Command\DeployTestBranchCommand;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * @coversNothing
+ * @covers \Pvg\Command\DeployTestBranchCommand
  */
 class DeployTestBranchCommandTest extends TestCase
 {

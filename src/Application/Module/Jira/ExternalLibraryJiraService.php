@@ -15,8 +15,7 @@ use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
 use Pvg\Event\Application\TicketsFetchedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
+use TypeError;
 
 class ExternalLibraryJiraService implements
     JiraService,
@@ -26,7 +25,7 @@ class ExternalLibraryJiraService implements
     private const MAX_RESULTS = 100;
 
     /** @var IssueService */
-    private $jiraService;
+    private $issueService;
 
     /** @var LoggerInterface */
     private $logger;
@@ -38,15 +37,15 @@ class ExternalLibraryJiraService implements
     private $queryRepository;
 
     public function __construct(
-        IssueService $jiraIssueService,
+        IssueService $issueService,
         LoggerInterface $logger,
         EventDispatcherInterface $dispatcher,
         QueryRepository $queryRepository
     ) {
-        $this->jiraService       = $jiraIssueService;
-        $this->logger            = $logger;
-        $this->dispatcher        = $dispatcher;
-        $this->queryRepository   = $queryRepository;
+        $this->issueService    = $issueService;
+        $this->logger          = $logger;
+        $this->dispatcher      = $dispatcher;
+        $this->queryRepository = $queryRepository;
     }
 
     /**
@@ -55,21 +54,26 @@ class ExternalLibraryJiraService implements
      */
     public function onApplicationInitialized(ApplicationInitializedEvent $event = null) : void
     {
-        if ($this->login()) {
-            $this->fetchAllTickets();
+        if (!$this->validateCredentials()) {
+            $this->logger->warning('Invalid login or password');
         }
+        $this->fetchAllTickets();
     }
 
     /**
      * Method uses provided credentials to connect JIRA.
-     * If successful returns true. If credentials are invalid
+     * If successful returns true. If credentials are invalid.
      * JiraException is thrown.
      */
-    public function login() : bool
+    public function validateCredentials() : bool
     {
-        $this->jiraService->search($this->queryRepository->validateCredentials());
+        try {
+            $this->issueService->search($this->queryRepository->validateCredentials());
 
-        return true;
+            return true;
+        } catch (JiraException $e) {
+            return false;
+        }
     }
 
     /**
@@ -77,19 +81,21 @@ class ExternalLibraryJiraService implements
      */
     public function fetchTicketsByStatus(string $status) : void
     {
+        $tickets = null;
         try {
-            $tickets = $this->sendQuery(
-                $this->
-                queryRepository->
-                fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
-            );
-            $this->dispatchTicketsFetchedEvent(
-                $this->mapToJiraTicket(
-                    $this->issueSearchResultToArray($tickets)
-                )
-            );
+            $tickets = $this
+                ->sendQuery($this
+                    ->queryRepository
+                    ->fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
+                );
         } catch (InvalidJiraStatusException $e) {
             $this->logger->info('Error: ' . $e->getMessage());
+        }
+
+        try {
+            $this->issueSearchResultToArray($tickets);
+        } catch (TypeError $e) {
+            $this->logger->warning('Error. Fetching method returned null');
         }
     }
 
@@ -98,22 +104,52 @@ class ExternalLibraryJiraService implements
      */
     public function fetchAllTickets() : void
     {
-        $tickets = $this->sendQuery(
-            $this
+        $tickets = $this
+            ->sendQuery($this
                 ->queryRepository
                 ->fetchAllTickets()
-        );
-        $ticketsArray  = $this->issueSearchResultToArray($tickets);
-        $mappedTickets = $this->mapToJiraTicket($ticketsArray);
-        $this->dispatchTicketsFetchedEvent($mappedTickets);
-        $this->saveToFile(json_encode($mappedTickets), 'mappedTickets');
+            );
+
+        $this->logger->info('Tickets fetched.');
+        try {
+            $this->issueSearchResultToArray($tickets);
+        } catch (TypeError $e) {
+            $this->logger->warning('Error. Fetching method returned null');
+        }
     }
 
     /**
-     * Maps IssueSearchResult to JiraTicket object.
+     * Sends passed JQL query to JIRA and returns IssueSearchResult object.
+     */
+    private function sendQuery(string $jql) : ?IssueSearchResult
+    {
+        try {
+            return $this->issueService->search($jql, 0, self::MAX_RESULTS);
+        } catch (JiraException $e) {
+            $this->logger->info('Search Failed : ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Converts IssueSearchResult to array.
+     */
+    private function issueSearchResultToArray(IssueSearchResult $isr) : void
+    {
+        $ticketsArray = [];
+        foreach ($isr->issues as $issue) {
+            $ticketsArray[$issue->key] = json_decode(json_encode($issue), true);
+        }
+
+        $this->mapToJiraTicket($ticketsArray);
+    }
+
+    /**
+     * Maps and filters array with full Jira ticket into desired array format.
      * This method probably will be moved to separate class.
      */
-    public function mapToJiraTicket(array $tickets) : array
+    private function mapToJiraTicket(array $tickets) : void
     {
         $mappedTickets = [];
         $jiraTickets   = [];
@@ -123,58 +159,20 @@ class ExternalLibraryJiraService implements
                 $mappedTickets[$key][$mapper->outputKey()] = $mapper->map($value);
             }
         }
-
-        return $mappedTickets;
-    }
-
-    private function issueSearchResultToArray(IssueSearchResult $isr) : array
-    {
-        $ticketsArray = [];
-        foreach ($isr->issues as $issue) {
-            $ticketsArray[$issue->key] = json_decode(json_encode($issue), true);
+        $this->logger->info('Tickets mapped.');
+        foreach ($mappedTickets as $mappedTicket) {
+            $this->dispatchTicketsFetchedEvent($mappedTicket);
         }
-
-        return $ticketsArray;
-    }
-
-    /**
-     * Sends passed JQL query to JIRA and returns IssueSearchResult object.
-     */
-    private function sendQuery(string $jql) : ?IssueSearchResult
-    {
-        try {
-            return $this->jiraService->search($jql, 0, self::MAX_RESULTS);
-        } catch (JiraException $e) {
-            $this->logger->info('Search Failed : ' . $e->getMessage());
-        }
-
-        return null;
     }
 
     /**
      * Dispatches TicketsFetchedEvent.
      */
-    private function dispatchTicketsFetchedEvent(array $tickets) : void
+    private function dispatchTicketsFetchedEvent(array $ticket) : void
     {
         $this->dispatcher->dispatch(
             TicketsFetchedEvent::NAME,
-            new TicketsFetchedEvent($tickets)
+            new TicketsFetchedEvent($ticket)
         );
-    }
-
-    /*************** FOR EASIER DEVELOPMENT ONLY, PLEASE DON'T HATE IT ***************/
-
-    private function saveToFile(string $result, string $filename) : void
-    {
-        if ($result !== null) {
-            $fs = new Filesystem();
-            try {
-                $fs->dumpFile("/home/maro/$filename.json", $result);
-            } catch (IOException $e) {
-                $this->logger->info("Could not write to file\n" . $e->getMessage());
-            }
-        } else {
-            $this->logger->info('Nothing fetched');
-        }
     }
 }
