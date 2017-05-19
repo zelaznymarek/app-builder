@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pvg\Application\Module\Jira\Factory;
+namespace Pvg\Application\Utils\Factory;
 
 use Pvg\Application\Utils\Mapper\ArrayMapper;
 

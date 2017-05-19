@@ -23,6 +23,17 @@ services:
                 "@app.logger",
                 "@app.query_repository"]
 
+  app.bitbucket_service_factory:
+    class: Pvg\Application\Module\BitBucket\Factory\BitBucketServiceFactory
+    public: false
+
+  app.bitbucket_service:
+    class: \Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService
+    factory: 'app.bitbucket_service_factory:create'
+    arguments: ["%application.config%",
+                "@app.logger",
+                "@app.event_dispatcher"]
+
   app.configuration:
     class: \Pvg\Application\Configuration\ConfigReader
     arguments:

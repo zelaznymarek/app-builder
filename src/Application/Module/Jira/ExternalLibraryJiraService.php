@@ -9,13 +9,13 @@ use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
+use Pvg\Application\Module\Jira\Exception\NullResultReturned;
 use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
 use Pvg\Application\Utils\Mapper\JiraMapperCreator;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
-use Pvg\Event\Application\TicketsFetchedEvent;
+use Pvg\Event\Application\JiraTicketMappedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use TypeError;
 
 class ExternalLibraryJiraService implements
     JiraService,
@@ -57,7 +57,11 @@ class ExternalLibraryJiraService implements
         if (!$this->validateCredentials()) {
             $this->logger->warning('Invalid login or password');
         }
-        $this->fetchAllTickets();
+        try {
+            $this->fetchAllTickets();
+        } catch (NullResultReturned $e) {
+            $this->logger->warning($e->getMessage());
+        }
     }
 
     /**
@@ -77,7 +81,9 @@ class ExternalLibraryJiraService implements
     }
 
     /**
-     * Fetches tickets with passed status and dispatches TicketsFetchedEvent with tickets passed.
+     * Fetches tickets with passed status and dispatches JiraTicketMappedEvent with tickets passed.
+     *
+     * @throws NullResultReturned
      */
     public function fetchTicketsByStatus(string $status) : void
     {
@@ -92,15 +98,18 @@ class ExternalLibraryJiraService implements
             $this->logger->info('Error: ' . $e->getMessage());
         }
 
-        try {
-            $this->issueSearchResultToArray($tickets);
-        } catch (TypeError $e) {
-            $this->logger->warning('Error. Fetching method returned null');
+        $this->logger->info('Tickets fetched.');
+
+        if (null === $tickets) {
+            throw new NullResultReturned('Error. Fetching method returned null');
         }
+        $this->issueSearchResultToArray($tickets);
     }
 
     /**
-     * Fetches all tickets and dispatches TicketsFetchedEvent with tickets passed.
+     * Fetches all tickets and dispatches JiraTicketMappedEvent with tickets passed.
+     *
+     * @throws NullResultReturned
      */
     public function fetchAllTickets() : void
     {
@@ -111,11 +120,10 @@ class ExternalLibraryJiraService implements
             );
 
         $this->logger->info('Tickets fetched.');
-        try {
-            $this->issueSearchResultToArray($tickets);
-        } catch (TypeError $e) {
-            $this->logger->warning('Error. Fetching method returned null');
+        if (null === $tickets) {
+            throw new NullResultReturned('Error. Fetching method returned null');
         }
+        $this->issueSearchResultToArray($tickets);
     }
 
     /**
@@ -151,28 +159,28 @@ class ExternalLibraryJiraService implements
      */
     private function mapToJiraTicket(array $tickets) : void
     {
-        $mappedTickets = [];
-        $jiraTickets   = [];
+        $mappedTickets   = [];
+        $ticketMappers   = [];
         foreach ($tickets as $key => $value) {
-            $jiraTickets[$key] = JiraMapperCreator::createMapper();
-            foreach ($jiraTickets[$key] as $mapper) {
+            $ticketMappers[$key] = JiraMapperCreator::createMapper();
+            foreach ($ticketMappers[$key] as $mapper) {
                 $mappedTickets[$key][$mapper->outputKey()] = $mapper->map($value);
             }
         }
         $this->logger->info('Tickets mapped.');
         foreach ($mappedTickets as $mappedTicket) {
-            $this->dispatchTicketsFetchedEvent($mappedTicket);
+            $this->dispatchJiraTicketMappedEvent($mappedTicket);
         }
     }
 
     /**
-     * Dispatches TicketsFetchedEvent.
+     * Dispatches JiraTicketMappedEvent.
      */
-    private function dispatchTicketsFetchedEvent(array $ticket) : void
+    private function dispatchJiraTicketMappedEvent(array $ticket) : void
     {
         $this->dispatcher->dispatch(
-            TicketsFetchedEvent::NAME,
-            new TicketsFetchedEvent($ticket)
+            JiraTicketMappedEvent::NAME,
+            new JiraTicketMappedEvent($ticket)
         );
     }
 }

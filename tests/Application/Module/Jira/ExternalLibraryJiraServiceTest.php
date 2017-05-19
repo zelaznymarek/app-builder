@@ -4,110 +4,167 @@ declare(strict_types=1);
 
 namespace Tests\Application\Module\Jira;
 
+use JiraRestApi\Configuration\ArrayConfiguration;
+use JiraRestApi\Issue\IssueSearchResult;
 use JiraRestApi\Issue\IssueService;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Module\Jira\ExternalLibraryJiraService;
 use Pvg\Application\Module\Jira\QueryRepository;
+use Pvg\Event\Application\JiraTicketMappedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * @coversNothing
+ * @covers \Pvg\Application\Module\Jira\ExternalLibraryJiraService
  */
 class ExternalLibraryJiraServiceTest extends TestCase
 {
-    /** @var IssueService */
-    private $jiraService;
-    /** @var LoggerInterface */
+    /** @var LoggerInterface | \PHPUnit_Framework_MockObject_MockObject */
     private $logger;
     /** @var EventDispatcherInterface | \PHPUnit_Framework_MockObject_MockObject */
     private $dispatcher;
     /** @var QueryRepository */
     private $queryRepository;
-    /** @var ExternalLibraryJiraService */
-    private $service;
-    /** @var array */
-    private $data;
+    /** @var IssueService */
+    private $issueService;
 
     public function setUp() : void
     {
-        $this->jiraService       = $this->createMock(IssueService::class);
-        $this->logger            = $this->createMock(LoggerInterface::class);
-        $this->dispatcher        = $this->createMock(EventDispatcherInterface::class);
-        $this->queryRepository   = new QueryRepository();
-        $this->service           = new ExternalLibraryJiraService(
-            $this->jiraService,
-            $this->logger,
-            $this->dispatcher,
-            $this->queryRepository
-        );
-
-        $this->data = [
-            'IN-4' => [
-                'fields' => [
-                    'assignee' => [
-                        'active'       => true,
-                        'displayName'  => 'Steffen Stundzig',
-                        'emailAddress' => 'steffen.stundzig@sstit.de',
-                        'name'         => 'steffen',
-                    ],
-                    'components' => [
-                        'name' => 'Jira, Confluence, Bitbucket',
-                    ],
-                    'status' => [
-                        'name'           => 'In Progress',
-                        'statuscategory' => [
-                            'name' => 'In Progress...',
-                        ],
-                    ],
-                    'summary' => 'Konfiguration Support Hotline',
-                ],
-                'id'  => '10008',
-                'key' => 'IN-4',
-            ],
-        ];
+        $this->logger          = $this->createMock(LoggerInterface::class);
+        $this->dispatcher      = $this->createMock(EventDispatcherInterface::class);
+        $this->queryRepository = new QueryRepository();
     }
 
     /**
      * @test
      */
-    public function map() : void
+    public function validateCredentialsReturnsFalse() : void
     {
-        $result = $this->service->mapToJiraTicket($this->data);
-        $this->assertInternalType('array', $result);
-        $this->assertInternalType('array', $result['IN-4']);
-        $this->assertInternalType('array', $result['IN-4']['assignee']);
-        $this->assertTrue($result['IN-4']['assignee']['active']);
-        $this->assertSame('steffen', $result['IN-4']['assignee']['name']);
-        $this->assertSame('Jira, Confluence, Bitbucket', $result['IN-4']['components']);
-        $this->assertSame('In Progress', $result['IN-4']['status']);
-        $this->assertSame('In Progress...', $result['IN-4']['status_category']);
-        $this->assertSame('Konfiguration Support Hotline', $result['IN-4']['summary']);
-        $this->assertSame(10008, $result['IN-4']['id']);
-        $this->assertSame('IN-4', $result['IN-4']['ticket_key']);
+        /** @var IssueService */
+        $issueService = new IssueService(
+            new ArrayConfiguration([
+                'jiraHost'     => 'host',
+                'jiraUser'     => 'user',
+                'jiraPassword' => 'pass',
+            ]));
+
+        /** @var ExternalLibraryJiraService */
+        $jiraService = new ExternalLibraryJiraService(
+            $issueService,
+            $this->logger,
+            $this->dispatcher,
+            $this->queryRepository
+        );
+
+        $this->assertFalse($jiraService->validateCredentials());
     }
 
-    /*
-        /**
-         * @test
+    /**
+     * @test
+     */
+    public function validateCredentialsReturnsTrue() : void
+    {
+        /** @var IssueService */
+        $issueService = $this->createMock(IssueService::class);
+
+        /** @var ExternalLibraryJiraService */
+        $jiraService = new ExternalLibraryJiraService(
+            $issueService,
+            $this->logger,
+            $this->dispatcher,
+            $this->queryRepository
+        );
+
+        $this->assertTrue($jiraService->validateCredentials());
+    }
+
+    /**
+     * @test
+     * @dataProvider issueServiceDataProvider
+     */
+    public function expectDispatchedEventContainsMappedIssue(
+        array $ticket,
+        array $result
+    ) : void {
+        /** @var IssueSearchResult */
+        $isr = $ticket;
+
+        $arrayConfig = new ArrayConfiguration([
+            'jiraHost'     => 'host',
+            'jiraUser'     => 'user',
+            'jiraPassword' => 'pass',
+        ]);
+
+        /* @var \PHPUnit_Framework_MockObject_MockObject issueService */
+        $this->issueService = $this->getMockBuilder(IssueService::class)
+            ->setConstructorArgs([$arrayConfig])
+            ->setMethods(['search'])
+            ->getMock();
+
+        /** @var IssueService */
+        $issueService = $this->issueService;
+
+        /** @var ExternalLibraryJiraService */
+        $jiraService = new ExternalLibraryJiraService(
+            $issueService,
+            $this->logger,
+            $this->dispatcher,
+            $this->queryRepository
+        );
+
+        $this->issueService
+            ->expects($this->once())
+            ->method('search')
+            ->willReturn($isr);
+
+        $this
+            ->dispatcher
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with(JiraTicketMappedEvent::NAME,
+                new JiraTicketMappedEvent($result));
+
+        $jiraService->fetchAllTickets();
+    }
+
+    public function issueServiceDataProvider() : array
+    {
+        /** TODO Build stdClass similar to IssueSearchResult
+         *
          */
-    /*
-    public function login() : void
-    {
-        $this->dispatcher->expects($this->once())
-            ->method('dispatch');
+        $issue        = new \stdClass();
+        $issue->array = [
+            [
+                'id'     => '10',
+                'key'    => 'TEST',
+                'fields' => [
+                    'assignee' => [
+                        'name'   => 'marek',
+                        'active' => true,
+                    ],
+                    'status' => [
+                        'name'            => 'Done',
+                        'status_category' => 'Done...',
+                    ],
+                ],
+                'summary' => 'Test summary',
+            ],
+        ];
 
-        $this->assertTrue($this->service->login());
+        $result = [
+            'TEST' => [
+                'id'              => 10,
+                'ticket_key'      => 'TEST',
+                'assignee_name'   => 'marek',
+                'assignee_active' => true,
+                'status'          => 'Done',
+                'status_category' => 'Done...',
+                'summary'         => 'Test summary',
+            ],
+        ];
 
-        $this->service->onApplicationInitialized();
+        return [
+            'data1' => [$issue->array, $result],
+        ];
     }
-
-    public function testFetchAllTickets() : void
-    {
-        $this->dispatcher->expects($this->once())
-            ->method('dispatch');
-
-        $this->service->fetchAllTickets();
-    }
-    */
 }
