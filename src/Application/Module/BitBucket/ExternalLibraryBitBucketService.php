@@ -9,6 +9,7 @@ use Pvg\Application\Utils\Mapper\BitbucketMapperCreator;
 use Pvg\Event\Application\BitbucketTicketMappedEvent;
 use Pvg\Event\Application\JiraTicketMappedEvent;
 use Pvg\Event\Application\JiraTicketMappedEventAware;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
@@ -54,9 +55,11 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
 
     /**
      * Fetches data from BitBucket by tickets id.
+     * @throws RuntimeException
      */
     private function fetchBitBucketData() : void
     {
+        $bbFullTicket = [];
         $response = $this
             ->guzzleClient
             ->client()
@@ -64,9 +67,12 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
                 'auth'    => [$this->guzzleClient->user(), $this->guzzleClient->password()],
                 'headers' => ['Accept' => 'application/json'],
             ]);
-
-        $BBfullTicket[$this->ticketId] = json_decode($response->getBody(), true);
-        $this->mapToBitbucketTicket($BBfullTicket);
+        try {
+            $bbFullTicket[$this->ticketId] = json_decode($response->getBody()->getContents(), true);
+        } catch (RuntimeException $e) {
+            $this->logger->warning($e->getMessage());
+        }
+        $this->mapToBitbucketTicket($bbFullTicket);
     }
 
     /**
