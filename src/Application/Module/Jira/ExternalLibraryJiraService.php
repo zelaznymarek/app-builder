@@ -22,7 +22,7 @@ class ExternalLibraryJiraService implements
     ApplicationInitializedEventAware
 {
     /** @var int */
-    private const MAX_RESULTS = 100;
+    private const MAX_RESULTS = 1;
 
     /** @var IssueService */
     private $issueService;
@@ -56,11 +56,12 @@ class ExternalLibraryJiraService implements
     {
         if (!$this->validateCredentials()) {
             $this->logger->warning('Invalid login or password');
-        }
-        try {
-            $this->fetchAllTickets();
-        } catch (NullResultReturned $e) {
-            $this->logger->warning($e->getMessage());
+        } else {
+            try {
+                $this->fetchAllTickets();
+            } catch (NullResultReturned $e) {
+                $this->logger->warning($e->getMessage());
+            }
         }
     }
 
@@ -95,7 +96,7 @@ class ExternalLibraryJiraService implements
                     ->fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
                 );
         } catch (InvalidJiraStatusException $e) {
-            $this->logger->info('Error: ' . $e->getMessage());
+            $this->logger->warning('Error: ' . $e->getMessage());
         }
 
         $this->logger->info('Tickets fetched.');
@@ -134,7 +135,7 @@ class ExternalLibraryJiraService implements
         try {
             return $this->issueService->search($jql, 0, self::MAX_RESULTS);
         } catch (JiraException $e) {
-            $this->logger->info('Search Failed : ' . $e->getMessage());
+            $this->logger->warning('Search Failed : ' . $e->getMessage());
         }
 
         return null;
