@@ -74,7 +74,7 @@ class BitbucketMapperCreator
                         ]),
                     ]),
                 ]),
-            ], 'pull_request_source'),
+            ], 'pull_request_branch'),
         ];
     }
 }

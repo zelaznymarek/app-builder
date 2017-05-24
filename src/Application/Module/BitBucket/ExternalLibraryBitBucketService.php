@@ -12,7 +12,7 @@ use Pvg\Event\Application\JiraTicketMappedEventAware;
 use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
+class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, BitBucketService
 {
     /** @var string */
     private const URL_PREFIX = 'https://farpoint.get-ag.com/jira/rest/dev-status/1.0/issue/detail?issueId=';
@@ -50,17 +50,22 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
     {
         $this->ticketId = $event->ticket()['id'];
         $this->createUrl();
-        $this->fetchBitBucketData();
+        try {
+            $this->fetchBitBucketData();
+        } catch (RuntimeException $e) {
+            $this->logger->warning('Error occured: ' . $e->getMessage());
+        }
     }
 
     /**
      * Fetches data from BitBucket by tickets id.
+     *
      * @throws RuntimeException
      */
-    private function fetchBitBucketData() : void
+    public function fetchBitBucketData() : void
     {
         $bbFullTicket = [];
-        $response = $this
+        $response     = $this
             ->guzzleClient
             ->client()
             ->request('GET', $this->url, [
@@ -76,7 +81,7 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
     }
 
     /**
-     * Maps and filters recived BitBucket data to array.
+     * Maps and filters received BitBucket data to array.
      */
     private function mapToBitbucketTicket(array $bbTicket) : void
     {
@@ -85,6 +90,7 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware
         foreach ($ticketMappers as $mapper) {
             $mappedTicket[$this->ticketId][$mapper->outputKey()] = $mapper->map($bbTicket[$this->ticketId]);
         }
+        $this->logger->info('Bitbucket data mapped');
         $this->dispatcher->dispatch(BitbucketTicketMappedEvent::NAME,
             new BitbucketTicketMappedEvent($mappedTicket));
     }

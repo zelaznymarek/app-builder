@@ -22,7 +22,7 @@ class ExternalLibraryJiraService implements
     ApplicationInitializedEventAware
 {
     /** @var int */
-    private const MAX_RESULTS = 1;
+    private const MAX_RESULTS = 100;
 
     /** @var IssueService */
     private $issueService;
@@ -179,6 +179,7 @@ class ExternalLibraryJiraService implements
      */
     private function dispatchJiraTicketMappedEvent(array $ticket) : void
     {
+        $this->logger->info('Jira dispatched');
         $this->dispatcher->dispatch(
             JiraTicketMappedEvent::NAME,
             new JiraTicketMappedEvent($ticket)

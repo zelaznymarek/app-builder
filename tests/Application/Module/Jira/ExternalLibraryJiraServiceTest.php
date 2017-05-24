@@ -11,7 +11,6 @@ use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
 use Pvg\Application\Module\Jira\Exception\NullResultReturned;
 use Pvg\Application\Module\Jira\ExternalLibraryJiraService;
 use Pvg\Application\Module\Jira\QueryRepository;
@@ -32,23 +31,23 @@ class ExternalLibraryJiraServiceTest extends TestCase
     /** @var IssueService */
     private $issueService;
 
-    public function setUp(): void
+    public function setUp() : void
     {
-        $this->logger = $this->createMock(LoggerInterface::class);
-        $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $this->logger          = $this->createMock(LoggerInterface::class);
+        $this->dispatcher      = $this->createMock(EventDispatcherInterface::class);
         $this->queryRepository = new QueryRepository();
     }
 
     /**
      * @test
      */
-    public function validateCredentialsReturnsFalse(): void
+    public function validateCredentialsReturnsFalse() : void
     {
         /** @var IssueService */
         $issueService = new IssueService(
             new ArrayConfiguration([
-                'jiraHost' => 'host',
-                'jiraUser' => 'user',
+                'jiraHost'     => 'host',
+                'jiraUser'     => 'user',
                 'jiraPassword' => 'pass',
             ]));
 
@@ -66,7 +65,7 @@ class ExternalLibraryJiraServiceTest extends TestCase
     /**
      * @test
      */
-    public function validateCredentialsReturnsTrue(): void
+    public function validateCredentialsReturnsTrue() : void
     {
         /** @var IssueService */
         $issueService = $this->createMock(IssueService::class);
@@ -89,11 +88,10 @@ class ExternalLibraryJiraServiceTest extends TestCase
     public function expectDispatchedEventContainsMappedIssue(
         IssueSearchResult $isr,
         array $result
-    ): void
-    {
+    ) : void {
         $arrayConfig = new ArrayConfiguration([
-            'jiraHost' => 'host',
-            'jiraUser' => 'user',
+            'jiraHost'     => 'host',
+            'jiraUser'     => 'user',
             'jiraPassword' => 'pass',
         ]);
 
@@ -131,12 +129,12 @@ class ExternalLibraryJiraServiceTest extends TestCase
 
     /**
      * @test
-    */
+     */
     public function expectFetchAllTicketsThrowsException() : void
     {
         $arrayConfig = new ArrayConfiguration([
-            'jiraHost' => 'host',
-            'jiraUser' => 'user',
+            'jiraHost'     => 'host',
+            'jiraUser'     => 'user',
             'jiraPassword' => 'pass',
         ]);
 
@@ -165,7 +163,6 @@ class ExternalLibraryJiraServiceTest extends TestCase
         $this->expectExceptionMessage('Error. Fetching method returned null');
 
         $jiraService->fetchAllTickets();
-
     }
 
     /**
@@ -174,8 +171,8 @@ class ExternalLibraryJiraServiceTest extends TestCase
     public function onApplicationInitializedThrowsException() : void
     {
         $arrayConfig = new ArrayConfiguration([
-            'jiraHost' => 'host',
-            'jiraUser' => 'user',
+            'jiraHost'     => 'host',
+            'jiraUser'     => 'user',
             'jiraPassword' => 'pass',
         ]);
 
@@ -194,7 +191,6 @@ class ExternalLibraryJiraServiceTest extends TestCase
             ->expects($this->once())
             ->method('warning')
             ->with('Invalid login or password');
-
 
         $jiraService->onApplicationInitialized();
     }
@@ -219,48 +215,45 @@ class ExternalLibraryJiraServiceTest extends TestCase
         $jiraService->fetchTicketsByStatus('InvalidStatus');
     }
 
-
-    public function issueServiceDataProvider(): array
+    public function issueServiceDataProvider() : array
     {
-
         /** TODO Build stdClass similar to IssueSearchResult
          *
          */
-        $issue = new Issue();
-        $issue->key = 'TEST';
-        $issue->id = '10';
+        $issue         = new Issue();
+        $issue->key    = 'TEST';
+        $issue->id     = '10';
         $issue->fields = [
             'assignee' => [
-                'name' => 'marek',
+                'name'   => 'marek',
                 'active' => true,
             ],
             'status' => [
-                'name' => 'Done',
+                'name'           => 'Done',
                 'statuscategory' => [
-                    'name' => 'Done...'
+                    'name' => 'Done...',
                     ],
             ],
-            'summary' => 'Test summary'
+            'summary' => 'Test summary',
         ];
 
         $issueSearchResult = new IssueSearchResult();
         $issueSearchResult->setIssues([$issue]);
 
         $result = [
-                'id' => 10,
-                'ticket_key' => 'TEST',
-                'assignee_name' => 'marek',
-                'assignee_active' => true,
-                'status' => 'Done',
-                'status_category' => 'Done...',
-                'summary' => 'Test summary',
-                'assignee_email' => '',
+                'id'                    => 10,
+                'ticket_key'            => 'TEST',
+                'assignee_name'         => 'marek',
+                'assignee_active'       => true,
+                'status'                => 'Done',
+                'status_category'       => 'Done...',
+                'summary'               => 'Test summary',
+                'assignee_email'        => '',
                 'assignee_display_name' => '',
-                'components' => '',
-                'ticket_type' => '',
-                'project' => '',
-                'fix_version' => '',
-
+                'components'            => '',
+                'ticket_type'           => '',
+                'project'               => '',
+                'fix_version'           => '',
         ];
 
         return [
