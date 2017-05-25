@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pvg\Event\Application;
 
-use Pvg\Application\Model\Ticket;
+use Pvg\Application\Model\ValueObject\Ticket;
 use Symfony\Component\EventDispatcher\Event;
 
 class FullTicketBuiltEvent extends Event

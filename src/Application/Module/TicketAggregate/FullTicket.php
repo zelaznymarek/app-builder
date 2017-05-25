@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pvg\Application\Module\TicketAggregate;
 
-use Pvg\Application\Model\Ticket;
+use Pvg\Application\Model\ValueObject\Ticket;
 
 class FullTicket implements TicketBuilder
 {

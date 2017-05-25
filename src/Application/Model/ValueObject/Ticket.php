@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pvg\Application\Model;
+namespace Pvg\Application\Model\ValueObject;
 
 use Pvg\Application\Model\Exception\NullArgumentException;
 
@@ -311,6 +311,9 @@ class Ticket
 
     private function setHasDirectory(?bool $hasDirectory) : void
     {
+        if (null === $hasDirectory) {
+            throw new NullArgumentException('Ticket "hasDirectory" cannot be null');
+        }
         $this->hasDirectory = $hasDirectory;
     }
 

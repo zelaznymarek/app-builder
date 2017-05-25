@@ -6,7 +6,7 @@ namespace Pvg\Application\Module\TicketAggregate;
 
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Model\Exception\NullArgumentException;
-use Pvg\Application\Model\Ticket;
+use Pvg\Application\Model\ValueObject\Ticket;
 use Pvg\Event\Application\BitbucketTicketMappedEvent;
 use Pvg\Event\Application\BitbucketTicketMappedEventAware;
 use Pvg\Event\Application\FullTicketBuiltEvent;
