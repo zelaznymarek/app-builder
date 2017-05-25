@@ -7,7 +7,7 @@ namespace Pvg\Application\Module\BitBucket\Factory;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService;
-use Pvg\Application\Module\BitBucket\GuzzleClient;
+use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class BitBucketServiceFactory
@@ -18,7 +18,7 @@ class BitBucketServiceFactory
         EventDispatcherInterface $dispatcher
     ) : ExternalLibraryBitBucketService {
         return new ExternalLibraryBitBucketService(
-            new GuzzleClient(
+            new ExternalLibraryHttpClient(
                 new Client(['base_uri' => $applicationConfig['parameters']['jira.host']]),
                 [
                     'user'     => $applicationConfig['parameters']['jira.authentication.username'],

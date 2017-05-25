@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pvg\Application\Utils\Mapper;
 
 use Pvg\Application\Module\Jira\Exception\MapperRepetitionException;
-use Symfony\Component\Config\Definition\Exception\UnsetKeyException;
 
 class ArrayMapper implements Mapper
 {
@@ -47,8 +46,6 @@ class ArrayMapper implements Mapper
 
     /**
      * Returns associative array with passed mappers.
-     *
-     * @throws UnsetKeyException
      */
     public function map(array $passedData, array $context = [])
     {
@@ -57,7 +54,7 @@ class ArrayMapper implements Mapper
         foreach ($this->mappers as $mapper) {
             $this->outputKey = $mapper->outputKey();
             if (!array_key_exists($mapper->key(), $data)) {
-                $result = '';
+                $result = null;
             } else {
                 $result = $mapper->map($data, $context ?: $data);
             }

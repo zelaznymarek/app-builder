@@ -60,8 +60,8 @@ class ExistingTicketsIndexService implements JiraTicketMappedEventAware
             $this->ticketDir    = '';
             $this->ticketExists = false;
         }
-        $this->logger->info('Tickets directory scoured');
-        $this->dispatcher->dispatch(TicketDirIndexedEvent::NAME,
+        $this->dispatcher->dispatch(
+            TicketDirIndexedEvent::NAME,
             new TicketDirIndexedEvent([
                 'ticketId'     => $this->id,
                 'ticketDir'    => $this->ticketDir,

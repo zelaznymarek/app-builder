@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pvg\Application\Module\BitBucket;
 
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Utils\Mapper\BitbucketMapperCreator;
+use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
+use Pvg\Application\Utils\Mapper\BitbucketMapperFactory;
 use Pvg\Event\Application\BitbucketTicketMappedEvent;
 use Pvg\Event\Application\JiraTicketMappedEvent;
 use Pvg\Event\Application\JiraTicketMappedEventAware;
@@ -23,37 +24,36 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
     /** @var string */
     private $url;
 
-    /** @var int */
-    private $ticketId;
-
     /** @var LoggerInterface */
     private $logger;
 
-    /** @var GuzzleClient */
-    private $guzzleClient;
+    /** @var ExternalLibraryHttpClient */
+    private $httpClient;
 
     /** @var EventDispatcherInterface */
     private $dispatcher;
 
     public function __construct(
-        GuzzleClient $guzzleClient,
+        ExternalLibraryHttpClient $httpClient,
         LoggerInterface $logger,
         EventDispatcherInterface $dispatcher
     ) {
-        $this->logger       = $logger;
-        $this->guzzleClient = $guzzleClient;
-        $this->dispatcher   = $dispatcher;
+        $this->logger     = $logger;
+        $this->httpClient = $httpClient;
+        $this->dispatcher = $dispatcher;
     }
 
     /** Recives event with mapped Jira ticket. */
     public function onJiraTicketMapped(JiraTicketMappedEvent $event) : void
     {
-        $this->ticketId = $event->ticket()['id'];
-        $this->createUrl();
+        $ticketId = $event->ticket()['id'];
+        $this->createUrl($ticketId);
         try {
-            $this->fetchBitBucketData();
-        } catch (RuntimeException $e) {
-            $this->logger->warning('Error occured: ' . $e->getMessage());
+            $this->fetchBitBucketData($ticketId);
+        } catch (RuntimeException $exception) {
+            $this->logger->warning(
+                'Error occured: ' . $exception->getMessage(),
+                [$exception]);
         }
     }
 
@@ -62,44 +62,40 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
      *
      * @throws RuntimeException
      */
-    public function fetchBitBucketData() : void
+    public function fetchBitBucketData(int $ticketId) : void
     {
         $bbFullTicket = [];
         $response     = $this
-            ->guzzleClient
-            ->client()
-            ->request('GET', $this->url, [
-                'auth'    => [$this->guzzleClient->user(), $this->guzzleClient->password()],
-                'headers' => ['Accept' => 'application/json'],
-            ]);
+            ->httpClient
+            ->request(ExternalLibraryHttpClient::GET, $this->url);
         try {
-            $bbFullTicket[$this->ticketId] = json_decode($response->getBody()->getContents(), true);
-        } catch (RuntimeException $e) {
-            $this->logger->warning($e->getMessage());
+            $bbFullTicket[$ticketId] = json_decode($response->getBody()->getContents(), true);
+        } catch (RuntimeException $exception) {
+            $this->logger->warning($exception->getMessage(), [$exception]);
         }
-        $this->mapToBitbucketTicket($bbFullTicket);
+        $this->mapToBitbucketTicket($bbFullTicket, $ticketId);
     }
 
     /**
      * Maps and filters received BitBucket data to array.
      */
-    private function mapToBitbucketTicket(array $bbTicket) : void
+    private function mapToBitbucketTicket(array $bbTicket, int $ticketId) : void
     {
         $mappedTicket  = [];
-        $ticketMappers = BitbucketMapperCreator::createMapper();
+        $ticketMappers = BitbucketMapperFactory::create();
         foreach ($ticketMappers as $mapper) {
-            $mappedTicket[$this->ticketId][$mapper->outputKey()] = $mapper->map($bbTicket[$this->ticketId]);
+            $mappedTicket[$ticketId][$mapper->outputKey()] = $mapper->map($bbTicket[$ticketId]);
         }
-        $this->logger->info('Bitbucket data mapped');
-        $this->dispatcher->dispatch(BitbucketTicketMappedEvent::NAME,
+        $this->dispatcher->dispatch(
+            BitbucketTicketMappedEvent::NAME,
             new BitbucketTicketMappedEvent($mappedTicket));
     }
 
     /**
      * Combines url with given ticket id.
      */
-    private function createUrl() : void
+    private function createUrl(int $ticketId) : void
     {
-        $this->url = self::URL_PREFIX . $this->ticketId . self::URL_SUFFIX;
+        $this->url = self::URL_PREFIX . $ticketId . self::URL_SUFFIX;
     }
 }

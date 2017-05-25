@@ -11,9 +11,10 @@ services:
   app.bitbucket_service:
     class: \Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService
     factory: 'app.bitbucket_service_factory:create'
-    arguments: ["%application.config%",
-                "@app.logger",
-                "@app.event_dispatcher"]
+    arguments:
+      - "%application.config%"
+      - "@app.logger"
+      - "@app.event_dispatcher"
 
   app.configuration:
     class: \Pvg\Application\Configuration\ConfigReader
@@ -33,9 +34,10 @@ services:
   app.existing_tickets_index_service:
     class: \Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
     factory: 'app.existing_tickets_index_service_factory:create'
-    arguments: ["%application.config%",
-                  "@app.event_dispatcher",
-                  "@app.logger"]
+    arguments:
+      - "%application.config%"
+      - "@app.event_dispatcher"
+      - "@app.logger"
 
   app.full_ticket_builder:
     class: \Pvg\Application\Module\TicketAggregate\FullTicket
@@ -48,10 +50,11 @@ services:
   app.jira_service:
     class: \Pvg\Application\Module\Jira\ExternalLibraryJiraService
     factory: 'app.jira_service_factory:create'
-    arguments: ["%application.config%",
-                "@app.event_dispatcher",
-                "@app.logger",
-                "@app.query_repository"]
+    arguments:
+      - "%application.config%"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+      - "@app.query_repository"
 
   app.logger:
     class: \SimpleLogger\Stdout
@@ -78,4 +81,3 @@ services:
       - "%application.config%"
       - "@app.logger"
       - "@app.event_dispatcher"
-

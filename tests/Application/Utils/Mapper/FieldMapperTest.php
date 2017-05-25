@@ -55,7 +55,22 @@ class FieldMapperTest extends TestCase
     ) : void {
         $fieldMapper = new FieldMapper($key, $closure, $outputKey);
 
-        $this->assertSame(true, $fieldMapper->map($data));
+        $this->assertTrue($fieldMapper->map($data));
+    }
+
+    /**
+     * @test
+     * @dataProvider falseActiveProvider
+     */
+    public function expectIsActiveFalseIfEmptyStringGiven(
+        string $key,
+        Closure $closure,
+        string $outputKey,
+        array $data
+    ) : void {
+        $fieldMapper = new FieldMapper($key, $closure, $outputKey);
+
+        $this->assertFalse($fieldMapper->map($data));
     }
 
     /*************************** DATA PROVIDERS **********************************************/
@@ -125,6 +140,23 @@ class FieldMapperTest extends TestCase
                 $closure,
                 'isActive',
                 $data = ['active' => true],
+            ],
+        ];
+    }
+
+    public function falseActiveProvider() : array
+    {
+        /** @var Closure */
+        $closure = function ($data) : bool {
+            return (bool) $data;
+        };
+
+        return [
+            'correct data 7' => [
+                'active',
+                $closure,
+                'isActive',
+                $data = ['active' => ''],
             ],
         ];
     }

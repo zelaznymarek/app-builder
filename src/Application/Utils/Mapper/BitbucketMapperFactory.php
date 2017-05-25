@@ -6,12 +6,12 @@ namespace Pvg\Application\Utils\Mapper;
 
 use Closure;
 
-class BitbucketMapperCreator
+class BitbucketMapperFactory
 {
     /**
      * Returns a structure of mappers depending on expected result structure.
      */
-    public static function createMapper() : array
+    public static function create() : array
     {
         /** @var Closure */
         $stringClosure = function (string $data) : string {

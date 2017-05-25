@@ -217,9 +217,6 @@ class ExternalLibraryJiraServiceTest extends TestCase
 
     public function issueServiceDataProvider() : array
     {
-        /** TODO Build stdClass similar to IssueSearchResult
-         *
-         */
         $issue         = new Issue();
         $issue->key    = 'TEST';
         $issue->id     = '10';

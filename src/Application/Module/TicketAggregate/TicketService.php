@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pvg\Application\Module\TicketAggregate;
 
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Model\Exception\NullArgumentException;
+use Pvg\Application\Model\Ticket;
 use Pvg\Event\Application\BitbucketTicketMappedEvent;
 use Pvg\Event\Application\BitbucketTicketMappedEventAware;
 use Pvg\Event\Application\FullTicketBuiltEvent;
@@ -52,6 +54,9 @@ class TicketService implements
     /** @var int */
     private $parts;
 
+    /** @var int */
+    private $currentId;
+
     public function __construct(
         TicketBuilder $builder,
         EventDispatcherInterface $dispatcher,
@@ -71,13 +76,15 @@ class TicketService implements
      */
     public function onBitbucketTicketMapped(BitbucketTicketMappedEvent $event) : void
     {
-        $this->bbCompleted = false;
-        $this->logger->info('BB ticket: ' . key($event->bitbucketTicket()));
         $event->stopPropagation();
         foreach ($event->bitbucketTicket() as $key => $value) {
             $this->bitBucketData = $value;
+            $this->currentId     = $key;
         }
-        $this->buildBitbucketPart();
+        ++$this->parts;
+        $this->bbCompleted = true;
+        $this->printCompletionInfo();
+        $this->buildTicket();
     }
 
     /**
@@ -85,11 +92,13 @@ class TicketService implements
      */
     public function onJiraTicketMapped(JiraTicketMappedEvent $event) : void
     {
-        $this->jiraCompleted = false;
-        $this->logger->info('Jira ticket: ' . $event->ticket()['id']);
         $event->stopPropagation();
-        $this->jiraData = $event->ticket();
-        $this->buildJiraPart();
+        $this->jiraData  = $event->ticket();
+        $this->currentId = $event->ticket()['id'];
+        ++$this->parts;
+        $this->jiraCompleted = true;
+        $this->printCompletionInfo();
+        $this->buildTicket();
     }
 
     /**
@@ -97,64 +106,37 @@ class TicketService implements
      */
     public function onTicketDirIndexed(TicketDirIndexedEvent $event) : void
     {
-        $this->dirCompleted = false;
-        $this->logger->info('Dir ticket: ' . $event->indexedDir()['ticketId']);
         $event->stopPropagation();
-        $this->dirData = $event->indexedDir();
-        $this->buildDirectoryPart();
-    }
-
-    /**
-     * Builds JIRA part of ticket and sets its flag for true.
-     */
-    private function buildJiraPart() : void
-    {
-        $this->builder->addId($this->jiraData['id']);
-        $this->builder->addKey($this->jiraData['ticket_key']);
-        $this->builder->addAssigneeName($this->jiraData['assignee_name']);
-        $this->builder->addAssigneeDisplayName($this->jiraData['assignee_display_name']);
-        $this->builder->addAssigneeEmail($this->jiraData['assignee_email']);
-        $this->builder->addIsAssigneeActive($this->jiraData['assignee_active']);
-        $this->builder->addTicketStatus($this->jiraData['status']);
-        $this->builder->addTicketStatusCategory($this->jiraData['status_category']);
-        $this->builder->addComponents($this->jiraData['components']);
-        $this->builder->addType($this->jiraData['ticket_type']);
-        $this->builder->addProject($this->jiraData['project']);
-        $this->builder->addFixVersion($this->jiraData['fix_version']);
-        $this->builder->addSummary($this->jiraData['summary']);
-        $this->jiraCompleted = true;
+        $this->dirData   = $event->indexedDir();
+        $this->currentId = $event->indexedDir()['ticketId'];
         ++$this->parts;
-        $this->logger->info($this->parts . '/3 parts built');
-        $this->getTicket();
-    }
-
-    /**
-     * Builds BitBucket part of ticket and sets its flag for true.
-     */
-    private function buildBitbucketPart() : void
-    {
-        $this->builder->addBranch($this->bitBucketData['pull_request_branch']);
-        $this->builder->addLastUpdate($this->bitBucketData['pull_request_last_update']);
-        $this->builder->addUrl($this->bitBucketData['pull_request_url']);
-        $this->builder->addPullRequestStatus($this->bitBucketData['pull_request_status']);
-        $this->builder->addPullRequestName($this->bitBucketData['pull_request_name']);
-        ++$this->parts;
-        $this->logger->info($this->parts . '/3 parts built');
-        $this->bbCompleted = true;
-        $this->getTicket();
-    }
-
-    /**
-     * Builds local directory info part of ticket and sets its flag for true.
-     */
-    private function buildDirectoryPart() : void
-    {
-        $this->builder->addHasDirectory($this->dirData['ticketExists']);
-        $this->builder->addDirectory($this->dirData['ticketDir']);
-        ++$this->parts;
-        $this->logger->info($this->parts . '/3 parts built');
         $this->dirCompleted = true;
-        $this->getTicket();
+        $this->printCompletionInfo();
+        $this->buildTicket();
+    }
+
+    /**
+     * Calls ticketIsComplete method.
+     * Then calls getTicket method if true returned.
+     */
+    private function buildTicket() : void
+    {
+        if ($this->ticketIsComplete()) {
+            $this->getTicket();
+        }
+    }
+
+    /**
+     * Logs how many parts of ticket are already ready.
+     */
+    private function printCompletionInfo() : void
+    {
+        $this->logger->info(
+            'Ticket '
+            . $this->currentId
+            . ': '
+            . $this->parts
+            . '/3 parts built');
     }
 
     /**
@@ -170,11 +152,18 @@ class TicketService implements
      */
     private function getTicket() : void
     {
-        if ($this->ticketIsComplete()) {
+        $this->builder->addDirectoryData($this->dirData);
+        $this->builder->addPullRequestData($this->bitBucketData);
+        $this->builder->addTicketData($this->jiraData);
+        try {
             $this->ticket = $this->builder->ticket();
             $this->logger->info('Ticket id: ' . $this->ticket->id() . ' created');
-            $this->dispatcher->dispatch(FullTicketBuiltEvent::$NAME,
-                new FullTicketBuiltEvent($this->ticket));
+            $this->dispatcher->dispatch(
+                FullTicketBuiltEvent::$NAME,
+                new FullTicketBuiltEvent($this->ticket)
+            );
+        } catch (NullArgumentException $e) {
+            $this->logger->warning($e->getMessage());
         }
     }
 }

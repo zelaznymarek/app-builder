@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
 use Pvg\Application\Module\Jira\Exception\NullResultReturned;
 use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
-use Pvg\Application\Utils\Mapper\JiraMapperCreator;
+use Pvg\Application\Utils\Mapper\JiraMapperFactory;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
 use Pvg\Event\Application\JiraTicketMappedEvent;
@@ -22,7 +22,7 @@ class ExternalLibraryJiraService implements
     ApplicationInitializedEventAware
 {
     /** @var int */
-    private const MAX_RESULTS = 100;
+    private const MAX_RESULTS = 10;
 
     /** @var IssueService */
     private $issueService;
@@ -59,8 +59,8 @@ class ExternalLibraryJiraService implements
         } else {
             try {
                 $this->fetchAllTickets();
-            } catch (NullResultReturned $e) {
-                $this->logger->warning($e->getMessage());
+            } catch (NullResultReturned $exception) {
+                $this->logger->warning($exception->getMessage(), [$exception]);
             }
         }
     }
@@ -76,7 +76,7 @@ class ExternalLibraryJiraService implements
             $this->issueService->search($this->queryRepository->validateCredentials());
 
             return true;
-        } catch (JiraException $e) {
+        } catch (JiraException $exception) {
             return false;
         }
     }
@@ -95,8 +95,8 @@ class ExternalLibraryJiraService implements
                     ->queryRepository
                     ->fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
                 );
-        } catch (InvalidJiraStatusException $e) {
-            $this->logger->warning('Error: ' . $e->getMessage());
+        } catch (InvalidJiraStatusException $exception) {
+            $this->logger->warning('Error: ' . $exception->getMessage(), [$exception]);
         }
 
         $this->logger->info('Tickets fetched.');
@@ -163,7 +163,7 @@ class ExternalLibraryJiraService implements
         $mappedTickets   = [];
         $ticketMappers   = [];
         foreach ($tickets as $key => $value) {
-            $ticketMappers[$key] = JiraMapperCreator::createMapper();
+            $ticketMappers[$key] = JiraMapperFactory::create();
             foreach ($ticketMappers[$key] as $mapper) {
                 $mappedTickets[$key][$mapper->outputKey()] = $mapper->map($value);
             }
@@ -179,7 +179,6 @@ class ExternalLibraryJiraService implements
      */
     private function dispatchJiraTicketMappedEvent(array $ticket) : void
     {
-        $this->logger->info('Jira dispatched');
         $this->dispatcher->dispatch(
             JiraTicketMappedEvent::NAME,
             new JiraTicketMappedEvent($ticket)

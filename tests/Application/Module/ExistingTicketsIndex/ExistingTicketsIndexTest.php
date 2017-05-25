@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Tests\Application\Module\ExistingTicketsIndex;
 
@@ -21,22 +22,22 @@ class ExistingTicketsIndexTest extends TestCase
     /** @var LoggerInterface */
     private $logger;
 
-    public function setUp(): void
+    public function setUp() : void
     {
         $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
-        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->logger     = $this->createMock(LoggerInterface::class);
     }
 
     /**
      * @test
      * @dataProvider dataProvider
      */
-    public function dispatchesEventWithExpectedData(JiraTicketMappedEvent $event, array $result): void
+    public function dispatchesEventWithExpectedData(JiraTicketMappedEvent $event, array $result) : void
     {
         $configArray = [
             'parameters' => [
-                'server.user.project.homedir' => '/'
-            ]
+                'server.user.project.homedir' => '/',
+            ],
         ];
 
         $directoryService = new ExistingTicketsIndexService(
@@ -55,31 +56,31 @@ class ExistingTicketsIndexTest extends TestCase
         $directoryService->onJiraTicketMapped($event);
     }
 
-    public function dataProvider(): array
+    public function dataProvider() : array
     {
         return [
             'data1' => [
                 new JiraTicketMappedEvent([
-                    'id' => 10,
-                    'ticket_key' => 'home'
+                    'id'         => 10,
+                    'ticket_key' => 'home',
                 ]),
                 [
-                    'ticketId' => 10,
-                    'ticketDir' => '/home',
+                    'ticketId'     => 10,
+                    'ticketDir'    => '/home',
                     'ticketExists' => true,
-                ]
+                ],
             ],
             'data2' => [
                 new JiraTicketMappedEvent([
-                    'id' => 20,
-                    'ticket_key' => 'someKey'
+                    'id'         => 20,
+                    'ticket_key' => 'someKey',
                 ]),
                 [
-                    'ticketId' => 20,
-                    'ticketDir' => '',
+                    'ticketId'     => 20,
+                    'ticketDir'    => '',
                     'ticketExists' => false,
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

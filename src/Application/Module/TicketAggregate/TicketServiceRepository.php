@@ -55,7 +55,11 @@ class TicketServiceRepository implements
         if (array_key_exists($id, $this->ticketServices)) {
             return $this->ticketServices[$id];
         }
-        $ticketService             = $this->factory->create($this->builder, $this->dispatcher, $this->logger);
+        $ticketService = $this->factory->create(
+            $this->builder,
+            $this->dispatcher,
+            $this->logger
+        );
         $this->ticketServices[$id] = $ticketService;
 
         return $ticketService;

@@ -6,12 +6,12 @@ namespace Pvg\Application\Utils\Mapper;
 
 use Closure;
 
-class JiraMapperCreator
+class JiraMapperFactory
 {
     /**
      * Returns a structure of mappers depending on expected result structure.
      */
-    public static function createMapper() : array
+    public static function create() : array
     {
         /** @var Closure */
         $intClosure = function (string $data) : int {
@@ -24,7 +24,7 @@ class JiraMapperCreator
         };
 
         /** @var Closure */
-        $boolClosure = function (bool $data) : bool {
+        $boolClosure = function (?bool $data) : bool {
             return $data;
         };
 

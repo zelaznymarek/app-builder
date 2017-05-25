@@ -6,5 +6,5 @@ namespace Pvg\Application\Module\BitBucket;
 
 interface BitBucketService
 {
-    public function fetchBitBucketData() : void;
+    public function fetchBitBucketData(int $id) : void;
 }
