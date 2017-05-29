@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\Event;
 class FullTicketBuiltEvent extends Event
 {
     /** @var string */
-    public static $NAME = 'full.ticket.built';
+    public const NAME = 'full.ticket.built';
 
     /** @var Ticket */
     private $ticket;

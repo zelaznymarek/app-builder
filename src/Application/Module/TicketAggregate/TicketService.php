@@ -76,7 +76,6 @@ class TicketService implements
      */
     public function onBitbucketTicketMapped(BitbucketTicketMappedEvent $event) : void
     {
-        $event->stopPropagation();
         foreach ($event->bitbucketTicket() as $key => $value) {
             $this->bitBucketData = $value;
             $this->currentId     = $key;
@@ -92,7 +91,6 @@ class TicketService implements
      */
     public function onJiraTicketMapped(JiraTicketMappedEvent $event) : void
     {
-        $event->stopPropagation();
         $this->jiraData  = $event->ticket();
         $this->currentId = $event->ticket()['id'];
         ++$this->parts;
@@ -106,7 +104,6 @@ class TicketService implements
      */
     public function onTicketDirIndexed(TicketDirIndexedEvent $event) : void
     {
-        $event->stopPropagation();
         $this->dirData   = $event->indexedDir();
         $this->currentId = $event->indexedDir()['ticketId'];
         ++$this->parts;
@@ -159,7 +156,7 @@ class TicketService implements
             $this->ticket = $this->builder->ticket();
             $this->logger->info('Ticket id: ' . $this->ticket->id() . ' created');
             $this->dispatcher->dispatch(
-                FullTicketBuiltEvent::$NAME,
+                FullTicketBuiltEvent::NAME,
                 new FullTicketBuiltEvent($this->ticket)
             );
         } catch (NullArgumentException $e) {

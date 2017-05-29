@@ -27,9 +27,20 @@ class TicketTest extends TestCase
         $this->assertSame($ticketData['id'], $ticket->id());
         $this->assertSame($ticketData['ticket_key'], $ticket->key());
         $this->assertSame($ticketData['assignee_name'], $ticket->assigneeName());
+        $this->assertSame($ticketData['assignee_display_name'], $ticket->assigneeDisplayName());
+        $this->assertSame($ticketData['assignee_email'], $ticket->assigneeEmail());
+        $this->assertTrue($ticket->isAssigneeActive());
         $this->assertSame($ticketData['status'], $ticket->ticketStatus());
+        $this->assertSame($ticketData['status_category'], $ticket->ticketStatusCategory());
+        $this->assertSame($ticketData['components'], $ticket->components());
+        $this->assertSame($ticketData['ticket_type'], $ticket->type());
         $this->assertSame($ticketData['project'], $ticket->project());
+        $this->assertSame($ticketData['fix_version'], $ticket->fixVersion());
+        $this->assertSame($ticketData['summary'], $ticket->summary());
+        $this->assertSame($prData['pull_request_branch'], $ticket->branch());
+        $this->assertSame($prData['pull_request_last_update'], $ticket->lastUpdate());
         $this->assertSame($prData['pull_request_url'], $ticket->url());
+        $this->assertSame($prData['pull_request_status'], $ticket->pullRquestStatus());
         $this->assertSame($prData['pull_request_name'], $ticket->pullRequestName());
         $this->assertSame($dirData['ticketExists'], $ticket->hasDirectory());
         $this->assertSame($dirData['ticketDir'], $ticket->directory());
@@ -55,13 +66,13 @@ class TicketTest extends TestCase
                 [
                     'id'                    => 20,
                     'ticket_key'            => 'key',
-                    'assignee_name'         => '',
+                    'assignee_name'         => 'name',
                     'assignee_display_name' => '',
-                    'assignee_email'        => '',
-                    'assignee_active'       => null,
+                    'assignee_email'        => 'email',
+                    'assignee_active'       => true,
                     'status'                => 'Done',
                     'status_category'       => 'Done',
-                    'components'            => '',
+                    'components'            => 'Comps',
                     'ticket_type'           => 'Fix',
                     'project'               => 'project',
                     'fix_version'           => '1.0',
