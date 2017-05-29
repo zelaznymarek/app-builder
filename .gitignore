@@ -4,3 +4,8 @@
 /jira-rest-client.log
 /src/Application/FileSaver.php
 /tests/Application/Module/jira-rest-client.log
+
+/var/*
+!/var/cache/
+/var/cache/*
+!var/cache/.gitkeep
