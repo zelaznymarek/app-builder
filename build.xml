@@ -61,7 +61,7 @@
             <arg value='-qrr' />
             <arg path='vendor/phpunit/phpunit/phpunit' />
             <arg value='--configuration=tests/phpunit.xml' />
-            <arg value='--repeat=2' />
+            <arg value='--coverage-html=/var/www/pvg/report' />
         </exec>
     </target>
 

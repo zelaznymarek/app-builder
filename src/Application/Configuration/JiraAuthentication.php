@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pvg\Application\Configuration\ValueObject;
+namespace Pvg\Application\Configuration;
 
 use InvalidArgumentException;
 
@@ -65,7 +65,7 @@ class JiraAuthentication
      */
     private function setUsername(string $username) : self
     {
-        if (empty($host)) {
+        if (empty($username)) {
             throw new InvalidArgumentException('Empty JIRA username configuration');
         }
         $this->username = $username;
@@ -78,7 +78,7 @@ class JiraAuthentication
      */
     private function setPassword(string $password) : self
     {
-        if (empty($host)) {
+        if (empty($password)) {
             throw new InvalidArgumentException('Empty JIRA password configuration');
         }
         $this->password = $password;

@@ -4,11 +4,20 @@ parameters:
   application.config: "@=service('app.configuration').get()"
 
 services:
-  app.logger:
-    class: \SimpleLogger\Stdout
-    
+  app.bitbucket_service_factory:
+    class: \Pvg\Application\Module\BitBucket\Factory\BitBucketServiceFactory
+    public: false
+
+  app.bitbucket_service:
+    class: \Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService
+    factory: 'app.bitbucket_service_factory:create'
+    arguments:
+      - "%application.config%"
+      - "@app.logger"
+      - "@app.event_dispatcher"
+
   app.configuration:
-    class: \PVG\Application\Configuration\ConfigReader
+    class: \Pvg\Application\Configuration\ConfigReader
     arguments:
       - "@app.file_locator"
       - "%config.path%"
@@ -17,9 +26,57 @@ services:
       - "@app.logger"
     calls:
       - method: init
+
+  app.existing_tickets_index_service_factory:
+    class: \Pvg\Application\Module\ExistingTicketsIndex\Factory\ExistingTicketsIndexServiceFactory
+    public: false
+
+  app.existing_tickets_index_service:
+    class: \Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
+    factory: 'app.existing_tickets_index_service_factory:create'
+    arguments:
+      - "%application.config%"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+
+  app.full_ticket_builder:
+    class: \Pvg\Application\Module\TicketAggregate\FullTicket
+    public: false
+
+  app.jira_service_factory:
+    class: \Pvg\Application\Module\Jira\Factory\JiraServiceFactory
+    public: false
+
+  app.jira_service:
+    class: \Pvg\Application\Module\Jira\ExternalLibraryJiraService
+    factory: 'app.jira_service_factory:create'
+    arguments:
+      - "%application.config%"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+      - "@app.query_repository"
+
+  app.logger:
+    class: \SimpleLogger\Stdout
+
+  app.ticket_service_factory:
+    class: \Pvg\Application\Module\TicketAggregate\Factory\TicketServiceFactory
+    public: false
+
+  app.ticket_service_repository:
+    class: \Pvg\Application\Module\TicketAggregate\TicketServiceRepository
+    arguments:
+      - "@app.ticket_service_factory"
+      - "@app.full_ticket_builder"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+
+  app.query_repository:
+      class: \Pvg\Application\Module\Jira\QueryRepository
+      public: false
       
   deploy_test_branch_command:
-    class: \PVG\Command\DeployTestBranchCommand
+    class: \Pvg\Command\DeployTestBranchCommand
     arguments:
       - "%application.config%"
       - "@app.logger"
