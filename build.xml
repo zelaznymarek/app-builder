@@ -2,7 +2,7 @@
 
 <project name='pvg/test-branch-builder' default='check'>
 
-    <target name='check' depends='phpcs,php-cs-fixer,phpcpd,phpstan,types-checker,phpunit' />
+    <target name='check' depends='phpcs,php-cs-fixer,phpcpd,phpstan,types-checker,phpmnd,phpunit' />
 
     <target name='fix'>
         <exec executable='bin/php-cs-fixer' passthru='true' checkreturn='true'>
@@ -53,6 +53,14 @@
         <exec executable='bin/types-checker' passthru='true' checkreturn='true'>
             <arg path='src' />
             <arg path='tests' />
+        </exec>
+    </target>
+
+    <target name='phpmnd'>
+        <exec executable='bin/phpmnd' passthru='true' checkreturn='true'>
+            <arg value='--non-zero-exit-on-violation' />
+            <arg value='--strings' />
+            <arg path='src' />
         </exec>
     </target>
 
