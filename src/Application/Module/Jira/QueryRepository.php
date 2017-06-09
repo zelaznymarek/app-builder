@@ -1,23 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\Jira;
 
 class QueryRepository
 {
     private const VALIDATE_CREDENTIALS_QUERY    = 'createdDate > now()';
-    private const FETCH_ALL_TICKETS_QUERY       = 'status not in (Done,
-                                                              Cancelled, 
-                                                              Rejected, 
-                                                              Closed, 
-                                                              Backlog, 
-                                                              Open, 
-                                                              "Check in progress", 
-                                                              "Check finished", 
-                                                              Abgelehnt, 
-                                                              Gelöst, 
-                                                              Erledigt) ORDER BY key ASC';
+    private const FETCH_ALL_TICKETS_QUERY       = 'status in '
+        . "('Work finished', 'Work in progress') "
+        . "OR (status = Done AND status changed AFTER startOfDay('-24h')) "
+        . 'ORDER BY key ASC';
 
     private const FETCH_TICKETS_BY_STATUS_QUERY = 'status = "%s"';
     private const FETCH_PARTICULAR_TICKET       = 'key = %s';

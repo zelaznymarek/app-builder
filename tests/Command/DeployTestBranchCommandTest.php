@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Tests\Command;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Configuration\ValueObject\Parameters;
 use Pvg\Command\DeployTestBranchCommand;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -17,8 +18,8 @@ class DeployTestBranchCommandTest extends TestCase
     /** @var LoggerInterface */
     private $logger;
 
-    /** @var array */
-    private $configArray;
+    /** @var Parameters | \PHPUnit_Framework_MockObject_MockObject */
+    private $applicationParams;
 
     /** @var EventDispatcherInterface | \PHPUnit_Framework_MockObject_MockObject */
     private $dispatcher;
@@ -28,15 +29,11 @@ class DeployTestBranchCommandTest extends TestCase
 
     public function setUp() : void
     {
-        $this->logger      = $this->createMock(LoggerInterface::class);
-        $this->configArray = [
-            'host'     => 'host',
-            'username' => 'user',
-            'password' => 'pass',
-        ];
+        $this->logger                  = $this->createMock(LoggerInterface::class);
+        $this->applicationParams       = $this->createMock(Parameters::class);
         $this->dispatcher              = $this->createMock(EventDispatcherInterface::class);
         $this->deployTestBranchCommand = new DeployTestBranchCommand(
-            $this->configArray,
+            $this->applicationParams,
             $this->logger,
             $this->dispatcher);
     }

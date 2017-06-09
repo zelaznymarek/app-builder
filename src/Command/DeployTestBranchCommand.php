@@ -1,10 +1,11 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Command;
 
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Configuration\ValueObject\Parameters;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\LogicException;
@@ -19,8 +20,8 @@ class DeployTestBranchCommand extends Command
     /** @var LoggerInterface */
     private $logger;
 
-    /** @var array */
-    private $configArray;
+    /** @var Parameters */
+    private $applicationParams;
 
     /** @var EventDispatcherInterface */
     private $dispatcher;
@@ -28,12 +29,15 @@ class DeployTestBranchCommand extends Command
     /**
      * @throws LogicException
      */
-    public function __construct(array $configArray, LoggerInterface $logger, EventDispatcherInterface $dispatcher)
-    {
+    public function __construct(
+        Parameters $applicationParams,
+        LoggerInterface $logger,
+        EventDispatcherInterface $dispatcher
+    ) {
         parent::__construct(null);
-        $this->configArray = $configArray;
-        $this->logger      = $logger;
-        $this->dispatcher  = $dispatcher;
+        $this->applicationParams = $applicationParams;
+        $this->logger            = $logger;
+        $this->dispatcher        = $dispatcher;
     }
 
     protected function configure() : void

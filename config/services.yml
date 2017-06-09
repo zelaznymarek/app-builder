@@ -1,5 +1,5 @@
 parameters:
-  config.path: "config/config.yml"
+  parameters.path: "config/parameters.yml"
   event.listener.config.path: "config/event.listener.yml"
   application.config: "@=service('app.configuration').get()"
 
@@ -12,7 +12,7 @@ services:
     class: \Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService
     factory: 'app.bitbucket_service_factory:create'
     arguments:
-      - "%application.config%"
+      - "@app.parameters"
       - "@app.logger"
       - "@app.event_dispatcher"
 
@@ -20,7 +20,7 @@ services:
     class: \Pvg\Application\Configuration\ConfigReader
     arguments:
       - "@app.file_locator"
-      - "%config.path%"
+      - "%parameters.path%"
       - "%event.listener.config.path%"
       - "@app.event_dispatcher"
       - "@app.logger"
@@ -35,7 +35,7 @@ services:
     class: \Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
     factory: 'app.existing_tickets_index_service_factory:create'
     arguments:
-      - "%application.config%"
+      - "@app.parameters"
       - "@app.event_dispatcher"
       - "@app.logger"
 
@@ -51,13 +51,32 @@ services:
     class: \Pvg\Application\Module\Jira\ExternalLibraryJiraService
     factory: 'app.jira_service_factory:create'
     arguments:
-      - "%application.config%"
+      - "@app.parameters"
       - "@app.event_dispatcher"
       - "@app.logger"
       - "@app.query_repository"
 
   app.logger:
     class: \SimpleLogger\Stdout
+
+  app.parameters:
+    class: \Pvg\Application\Configuration\ValueObject\Parameters
+    arguments:
+      - "%application.config%"
+
+  app.task_factory:
+    class: \Pvg\Application\Module\TaskManager\Factory\TaskFactory
+    arguments:
+      - "@app.logger"
+      - "@app.parameters"
+    public: false
+
+  app.task_manager_service:
+    class: \Pvg\Application\Module\TaskManager\TaskManagerService
+    arguments:
+      - "@app.task_factory"
+      - "@app.logger"
+      - "@app.event_dispatcher"
 
   app.ticket_service_factory:
     class: \Pvg\Application\Module\TicketAggregate\Factory\TicketServiceFactory
@@ -78,6 +97,6 @@ services:
   deploy_test_branch_command:
     class: \Pvg\Command\DeployTestBranchCommand
     arguments:
-      - "%application.config%"
+      - "@app.parameters"
       - "@app.logger"
       - "@app.event_dispatcher"

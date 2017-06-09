@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
-namespace Pvg\Application\Utils\Mapper;
+namespace Pvg\Application\Utils\Mapper\Factory;
 
 use Closure;
+use Pvg\Application\Utils\Mapper\ArrayMapper;
+use Pvg\Application\Utils\Mapper\FieldMapper;
 
 class JiraMapperFactory
 {

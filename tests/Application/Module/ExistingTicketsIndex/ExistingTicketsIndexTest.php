@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Tests\Application\Module\ExistingTicketsIndex;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Configuration\ValueObject\Parameters;
 use Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService;
 use Pvg\Event\Application\JiraTicketMappedEvent;
 use Pvg\Event\Application\TicketDirIndexedEvent;
@@ -34,14 +35,13 @@ class ExistingTicketsIndexTest extends TestCase
      */
     public function dispatchesEventWithExpectedData(JiraTicketMappedEvent $event, array $result) : void
     {
-        $configArray = [
-            'parameters' => [
-                'server.user.project.homedir' => '/',
-            ],
-        ];
+        $applicationParams = $this->createMock(Parameters::class);
+
+        $applicationParams->method('projectsHomeDir')->willReturn('/');
+        $applicationParams->method('path')->willReturn('/var');
 
         $directoryService = new ExistingTicketsIndexService(
-            $configArray,
+            $applicationParams,
             $this->dispatcher,
             $this->logger
         );
@@ -62,11 +62,11 @@ class ExistingTicketsIndexTest extends TestCase
             'data1' => [
                 new JiraTicketMappedEvent([
                     'id'         => 10,
-                    'ticket_key' => 'home',
+                    'ticket_key' => 'var',
                 ]),
                 [
                     'ticketId'     => 10,
-                    'ticketDir'    => '/home',
+                    'ticketDir'    => '/var',
                     'ticketExists' => true,
                 ],
             ],
@@ -77,7 +77,7 @@ class ExistingTicketsIndexTest extends TestCase
                 ]),
                 [
                     'ticketId'     => 20,
-                    'ticketDir'    => '',
+                    'ticketDir'    => null,
                     'ticketExists' => false,
                 ],
             ],

@@ -11,3 +11,6 @@ bitbucket.ticked.mapped:
 
 ticket.dir.indexed:
   - {service: app.ticket_service_repository, action: onTicketDirIndexed}
+
+full.ticket.built:
+  - {service: app.task_manager_service, action: onFullTicketBuilt}

@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\HttpClient;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Pvg\Application\Configuration\ValueObject\Parameters;
 
 /**
  * Class combines Guzzle Client object and an array with credentials for further convenience.
@@ -21,11 +22,15 @@ class ExternalLibraryHttpClient implements HttpClient
     /** @var array */
     private $headerConfig;
 
-    public function __construct(Client $client, array $credentials)
+    /** @var Parameters */
+    private $applicationParams;
+
+    public function __construct(Client $client, Parameters $applicationParams)
     {
-        $this->client       = $client;
-        $this->headerConfig = [
-            'auth'    => [$credentials['user'], $credentials['password']],
+        $this->applicationParams = $applicationParams;
+        $this->client            = $client;
+        $this->headerConfig      = [
+            'auth'    => [$applicationParams->authenticationUser(), $applicationParams->authenticationPassword()],
             'headers' => ['Accept' => 'application/json'],
         ];
     }
@@ -33,6 +38,11 @@ class ExternalLibraryHttpClient implements HttpClient
     public function client() : Client
     {
         return $this->client;
+    }
+
+    public function applicationParams() : Parameters
+    {
+        return $this->applicationParams;
     }
 
     /**

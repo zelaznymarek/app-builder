@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager;
-
-use Pvg\Application\Model\ValueObject\Ticket;
+namespace Pvg\Application\Module\TaskManager\Task;
 
 interface Task
 {
-    public function execute(Ticket $ticket) : void;
+    /**
+     * Executes task for particular application.
+     */
+    public function execute() : void;
 }

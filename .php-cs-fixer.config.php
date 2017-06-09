@@ -24,13 +24,13 @@ return PhpCsFixer\Config::create()
         'cast_spaces'                                 => true,
         'class_definition'                            => [
             'multiLineExtendsEachSingleLine' => true,
-            'singleLine'                     => true,
+            'singleItemSingleLine'           => true,
         ],
         'concat_space'                                => [
             'spacing' => 'one',
         ],
         'declare_equal_normalize'                     => [
-            'space' => 'none',
+            'space' => 'single',
         ],
         'declare_strict_types'                        => true, // forcing strict types will stop non strict code from working
         'dir_constant'                                => true, // risky when the function "dirname()" is overridden

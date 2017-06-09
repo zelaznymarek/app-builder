@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
-namespace Pvg\Application\Utils\Mapper;
+namespace Pvg\Application\Utils\Mapper\Factory;
 
 use Closure;
+use Pvg\Application\Utils\Mapper\ArrayMapper;
+use Pvg\Application\Utils\Mapper\FieldMapper;
 
 class BitbucketMapperFactory
 {
@@ -75,6 +77,21 @@ class BitbucketMapperFactory
                     ]),
                 ]),
             ], 'pull_request_branch'),
+
+            /* Repository */
+            new ArrayMapper('detail', [
+                new ArrayMapper('0', [
+                    new ArrayMapper('pullRequests', [
+                        new ArrayMapper('0', [
+                            new ArrayMapper('source', [
+                                new ArrayMapper('repository', [
+                                    new FieldMapper('name', $stringClosure),
+                                ]),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+            ], 'repository'),
         ];
     }
 }

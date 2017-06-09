@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\Jira\ValueObject;
 
@@ -8,21 +8,37 @@ use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
 
 class JiraTicketStatus
 {
-    private const ABGELEHNT         = 'Abgelehnt';
-    private const APPROVED          = 'Approved';
-    private const BACKLOG           = 'Backlog';
-    private const CANCELLED         = 'Cancelled';
-    private const CHECK_FINISHED    = 'Check finished';
-    private const CHECK_IN_PROGRESS = 'Check in progress';
-    private const CHECK_WAITING     = 'Check waiting';
-    private const CLOSED            = 'Closed';
-    private const DONE              = 'Done';
-    private const ERLEDIGT          = 'Erledigt';
-    private const GELOST            = 'Gelöst';
-    private const IN_PROGRESS       = 'In Progress';
-    private const IN_REVIEW         = 'In Review';
-    private const OPEN              = 'Open';
-    private const REJECTED          = 'Rejected';
+    public const ABGELEHNT                = 'Abgelehnt';
+    public const APPROVED                 = 'Approved';
+    public const BACKLOG                  = 'Backlog';
+    public const CANCELLED                = 'Cancelled';
+    public const CHECK_FINISHED           = 'Check finished';
+    public const CHECK_IN_PROGRESS        = 'Check in progress';
+    public const CHECK_WAITING            = 'Check waiting';
+    public const CLOSED                   = 'Closed';
+    public const DONE                     = 'Done';
+    public const ERLEDIGT                 = 'Erledigt';
+    public const GELOST                   = 'Gelöst';
+    public const IN_PROGRESS              = 'In Progress';
+    public const IN_REVIEW                = 'In Review';
+    public const OPEN                     = 'Open';
+    public const REJECTED                 = 'Rejected';
+    public const REOPENED                 = 'Reopened';
+    public const RESOLVED                 = 'Resolved';
+    public const REVIEW_FINISHED          = 'Review finished';
+    public const REVIEW_IN_PROGRESS       = 'Review in progress';
+    public const SELECTED_FOR_DEVELOPMENT = 'Selected for development';
+    public const TEST_FINISHED            = 'Test finished';
+    public const TEST_IN_PROGRESS         = 'Test in progress';
+    public const TO_DO                    = 'To do';
+    public const UNDER_REVIEW             = 'Under review';
+    public const WAITING                  = 'Waiting';
+    public const WARTET_AUF_ANNAHME       = 'wartet auf Annahme';
+    public const WARTET_AUF_DEN_SUPPORT   = 'Wartet auf den Support';
+    public const WARTET_AUF_KUNDEN        = 'Wartet auf Kunden';
+    public const WARTET_AUF_SUPPORT       = 'Wartet auf Support';
+    public const WORK_FINISHED            = 'Work finished';
+    public const WORK_IN_PROGRESS         = 'Work in progress';
 
     private const ALLOWED_STATUSES = [
         self::ABGELEHNT,
@@ -40,6 +56,22 @@ class JiraTicketStatus
         self::IN_REVIEW,
         self::OPEN,
         self::REJECTED,
+        self::REOPENED,
+        self::RESOLVED,
+        self::REVIEW_FINISHED,
+        self::REVIEW_IN_PROGRESS,
+        self::SELECTED_FOR_DEVELOPMENT,
+        self::TEST_FINISHED,
+        self::TEST_IN_PROGRESS,
+        self::TO_DO,
+        self::UNDER_REVIEW,
+        self::WAITING,
+        self::WARTET_AUF_ANNAHME,
+        self::WARTET_AUF_DEN_SUPPORT,
+        self::WARTET_AUF_KUNDEN,
+        self::WARTET_AUF_SUPPORT,
+        self::WORK_FINISHED,
+        self::WORK_IN_PROGRESS,
     ];
 
     /** @var string */

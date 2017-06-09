@@ -1,31 +1,26 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\Jira;
 
-use JiraRestApi\Issue\IssueSearchResult;
-use JiraRestApi\Issue\IssueService;
-use JiraRestApi\JiraException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
 use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
 use Pvg\Application\Module\Jira\Exception\NullResultReturned;
 use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
-use Pvg\Application\Utils\Mapper\JiraMapperFactory;
+use Pvg\Application\Utils\Mapper\Factory\JiraMapperFactory;
 use Pvg\Event\Application\ApplicationInitializedEvent;
 use Pvg\Event\Application\ApplicationInitializedEventAware;
 use Pvg\Event\Application\JiraTicketMappedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class ExternalLibraryJiraService implements
-    JiraService,
-    ApplicationInitializedEventAware
+class ExternalLibraryJiraService implements JiraService, ApplicationInitializedEventAware
 {
-    /** @var int */
-    private const MAX_RESULTS = 10;
-
-    /** @var IssueService */
-    private $issueService;
+    /** @var ExternalLibraryHttpClient */
+    private $httpClient;
 
     /** @var LoggerInterface */
     private $logger;
@@ -37,12 +32,12 @@ class ExternalLibraryJiraService implements
     private $queryRepository;
 
     public function __construct(
-        IssueService $issueService,
+        ExternalLibraryHttpClient $httpClient,
         LoggerInterface $logger,
         EventDispatcherInterface $dispatcher,
         QueryRepository $queryRepository
     ) {
-        $this->issueService    = $issueService;
+        $this->httpClient      = $httpClient;
         $this->logger          = $logger;
         $this->dispatcher      = $dispatcher;
         $this->queryRepository = $queryRepository;
@@ -54,9 +49,7 @@ class ExternalLibraryJiraService implements
      */
     public function onApplicationInitialized(ApplicationInitializedEvent $event = null) : void
     {
-        if (!$this->validateCredentials()) {
-            $this->logger->warning('Invalid login or password');
-        } else {
+        if ($this->validateCredentials()) {
             try {
                 $this->fetchAllTickets();
             } catch (NullResultReturned $exception) {
@@ -73,16 +66,25 @@ class ExternalLibraryJiraService implements
     public function validateCredentials() : bool
     {
         try {
-            $this->issueService->search($this->queryRepository->validateCredentials());
+            $this->httpClient->request(
+                ExternalLibraryHttpClient::GET,
+                $this->createUrl($this->queryRepository->validateCredentials())
+            );
 
             return true;
-        } catch (JiraException $exception) {
+        } catch (ClientException $exception) {
+            $this->logger->warning('Invalid login or password');
+
+            return false;
+        } catch (ConnectException $exception) {
+            $this->logger->warning('Invalid host');
+
             return false;
         }
     }
 
     /**
-     * Fetches tickets with passed status and dispatches JiraTicketMappedEvent with tickets passed.
+     * Fetches tickets with passed status and passes them to flattenArray method.
      *
      * @throws NullResultReturned
      */
@@ -90,78 +92,83 @@ class ExternalLibraryJiraService implements
     {
         $tickets = null;
         try {
-            $tickets = $this
-                ->sendQuery($this
-                    ->queryRepository
-                    ->fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status())
+            $response = $this
+                ->httpClient->request(
+                    ExternalLibraryHttpClient::GET,
+                    $this
+                        ->createUrl($this
+                            ->queryRepository
+                            ->fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status()))
                 );
+            $this->logger->info('Tickets fetched.');
+
+            $tickets = json_decode($response->getBody()->getContents(), true);
         } catch (InvalidJiraStatusException $exception) {
             $this->logger->warning('Error: ' . $exception->getMessage(), [$exception]);
         }
 
-        $this->logger->info('Tickets fetched.');
-
         if (null === $tickets) {
             throw new NullResultReturned('Error. Fetching method returned null');
         }
-        $this->issueSearchResultToArray($tickets);
+        $this->flattenArray($tickets);
     }
 
     /**
-     * Fetches all tickets and dispatches JiraTicketMappedEvent with tickets passed.
+     * Fetches all tickets and passes them to flattenArray method.
      *
      * @throws NullResultReturned
      */
     public function fetchAllTickets() : void
     {
-        $tickets = $this
-            ->sendQuery($this
-                ->queryRepository
-                ->fetchAllTickets()
+        $response = $this
+            ->httpClient->request(
+                ExternalLibraryHttpClient::GET,
+                $this
+                    ->createUrl($this
+                        ->queryRepository
+                        ->fetchAllTickets())
             );
+        $tickets = json_decode($response->getBody()->getContents(), true);
 
         $this->logger->info('Tickets fetched.');
         if (null === $tickets) {
             throw new NullResultReturned('Error. Fetching method returned null');
         }
-        $this->issueSearchResultToArray($tickets);
+        $this->flattenArray($tickets);
     }
 
     /**
-     * Sends passed JQL query to JIRA and returns IssueSearchResult object.
+     * Reconstructs array structure.
      */
-    private function sendQuery(string $jql) : ?IssueSearchResult
-    {
-        try {
-            return $this->issueService->search($jql, 0, self::MAX_RESULTS);
-        } catch (JiraException $e) {
-            $this->logger->warning('Search Failed : ' . $e->getMessage());
-        }
-
-        return null;
-    }
-
-    /**
-     * Converts IssueSearchResult to array.
-     */
-    private function issueSearchResultToArray(IssueSearchResult $isr) : void
+    private function flattenArray(array $tickets) : void
     {
         $ticketsArray = [];
-        foreach ($isr->issues as $issue) {
-            $ticketsArray[$issue->key] = json_decode(json_encode($issue), true);
+        foreach ($tickets['issues'] as $issue) {
+            $ticketsArray[$issue['key']] = $issue;
         }
 
         $this->mapToJiraTicket($ticketsArray);
     }
 
     /**
+     * Combines jira rest api url with jql.
+     */
+    private function createUrl(string $jql) : string
+    {
+        return $this->httpClient->applicationParams()->jiraHost()
+            . '/rest/api/2/search?jql='
+            . $jql
+            . '&maxResults='
+            . $this->httpClient->applicationParams()->jiraSearchMaxResults();
+    }
+
+    /**
      * Maps and filters array with full Jira ticket into desired array format.
-     * This method probably will be moved to separate class.
      */
     private function mapToJiraTicket(array $tickets) : void
     {
-        $mappedTickets   = [];
-        $ticketMappers   = [];
+        $mappedTickets = [];
+        $ticketMappers = [];
         foreach ($tickets as $key => $value) {
             $ticketMappers[$key] = JiraMapperFactory::create();
             foreach ($ticketMappers[$key] as $mapper) {

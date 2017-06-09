@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Utils\Mapper;
 
@@ -53,7 +53,7 @@ class ArrayMapper implements Mapper
         $result = [];
         foreach ($this->mappers as $mapper) {
             $this->outputKey = $mapper->outputKey();
-            if (!array_key_exists($mapper->key(), $data)) {
+            if (null === $data || !array_key_exists($mapper->key(), $data)) {
                 $result = null;
             } else {
                 $result = $mapper->map($data, $context ?: $data);

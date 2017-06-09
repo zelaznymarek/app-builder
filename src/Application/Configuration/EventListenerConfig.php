@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Configuration;
 
@@ -56,10 +56,10 @@ class EventListenerConfig
     }
 
     /**
-     * @return static[]
-     *
      * @throws \ReflectionException
      * @throws \InvalidArgumentException
+     *
+     * @return static[]
      */
     public static function createFromConfigArray(array $configArray) : array
     {

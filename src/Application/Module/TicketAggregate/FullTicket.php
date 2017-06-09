@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\TicketAggregate;
 
@@ -32,6 +32,9 @@ class FullTicket implements TicketBuilder
         $this->dirData = $dirData;
     }
 
+    /**
+     * Returns ticket VO created from jira ticket, pull request and directory data.
+     */
     public function ticket() : Ticket
     {
         return new Ticket(

@@ -43,8 +43,9 @@
     <target name='phpstan'>
         <exec executable='bin/phpstan' passthru='true' checkreturn='true'>
             <arg value='analyse' />
+            <arg value='--configuration=tests/phpstan.neon' />
             <arg value='--ansi' />
-            <arg value='--level=5' />
+            <arg value='--level=7' />
             <arg path='src' />
         </exec>
     </target>

@@ -1,9 +1,12 @@
 /bin/
-/config/config.yml
+/config/parameters.yml
 /vendor/
 /jira-rest-client.log
 /src/Application/FileSaver.php
 /tests/Application/Module/jira-rest-client.log
+/tests/Application/Module/Jira/ExternalLibraryJiraServiceTest.php
+/tests/Application/Module/BitBucket/ExternalLibraryBitBucketServiceTest.php
+/tests/phpstan.neon
 
 /var/*
 !/var/cache/

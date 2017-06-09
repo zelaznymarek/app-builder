@@ -1,74 +1,87 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Model\ValueObject;
 
 use Pvg\Application\Model\Exception\NullArgumentException;
+use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
 
 /**
  * Class represents complete ticket.
  */
 class Ticket
 {
-    /** @var int */
+    /** @var string */
+    private const DONE_STATUS = 'Done';
+
+    /** @var ?int */
     private $id;
 
-    /** @var string */
+    /** @var ?string */
     private $key;
 
-    /** @var string */
+    /** @var ?string */
     private $assigneeName;
 
-    /** @var string */
+    /** @var ?string */
     private $assigneeDisplayName;
 
-    /** @var string */
+    /** @var ?string */
     private $assigneeEmail;
 
-    /** @var bool */
+    /** @var ?bool */
     private $isAssigneeActive;
 
-    /** @var string */
+    /** @var ?string */
     private $ticketStatus;
 
-    /** @var string */
+    /** @var bool */
+    private $isDone;
+
+    /** @var ?string */
     private $ticketStatusCategory;
 
-    /** @var string */
+    /** @var ?string */
     private $components;
 
-    /** @var string */
+    /** @var ?string */
     private $type;
 
-    /** @var string */
+    /** @var ?string */
     private $project;
 
-    /** @var string */
+    /** @var ?string */
     private $fixVersion;
 
-    /** @var string */
+    /** @var ?string */
     private $summary;
 
-    /** @var string */
+    /** @var ?string */
     private $branch;
 
-    /** @var string */
+    /** @var bool */
+    private $hasBranch;
+
+    /** @var ?string */
     private $lastUpdate;
 
-    /** @var string */
+    /** @var ?string */
     private $url;
 
-    /** @var string */
+    /** @var ?string */
     private $pullRequestStatus;
 
-    /** @var string */
+    /** @var ?string */
     private $pullRequestName;
 
-    /** @var bool */
+    /** @var ?string */
+    private $repository;
+
+    /** @var ?bool */
     private $hasDirectory;
 
-    /** @var string */
+    /** @var ?string */
     private $directory;
 
     public function __construct(
@@ -83,6 +96,7 @@ class Ticket
         $this->setAssigneeEmail($ticketData['assignee_email']);
         $this->setIsAssigneeActive($ticketData['assignee_active']);
         $this->setTicketStatus($ticketData['status']);
+        $this->setIsDone($ticketData['status']);
         $this->setTicketStatusCategory($ticketData['status_category']);
         $this->setComponents($ticketData['components']);
         $this->setType($ticketData['ticket_type']);
@@ -91,13 +105,25 @@ class Ticket
         $this->setSummary($ticketData['summary']);
 
         $this->setBranch($prData['pull_request_branch']);
+        $this->setHasBranch($prData['pull_request_branch']);
         $this->setLastUpdate($prData['pull_request_last_update']);
         $this->setUrl($prData['pull_request_url']);
         $this->setPullRequestStatus($prData['pull_request_status']);
         $this->setPullRequestName($prData['pull_request_name']);
+        $this->setRepository($prData['repository']);
 
         $this->setHasDirectory($dirData['ticketExists']);
         $this->setDirectory($dirData['ticketDir']);
+    }
+
+    /**
+     * Compares passed status to tickets status.
+     * Returns true if same, false if not.
+     */
+    public function compareStatus(string $status) : bool
+    {
+        return mb_strtolower(JiraTicketStatus::createFromString($status)->status())
+            === mb_strtolower($this->ticketStatus);
     }
 
     public function id() : int
@@ -110,22 +136,22 @@ class Ticket
         return $this->key;
     }
 
-    public function assigneeName() : string
+    public function assigneeName() : ?string
     {
         return $this->assigneeName;
     }
 
-    public function assigneeDisplayName() : string
+    public function assigneeDisplayName() : ?string
     {
         return $this->assigneeDisplayName;
     }
 
-    public function assigneeEmail() : string
+    public function assigneeEmail() : ?string
     {
         return $this->assigneeEmail;
     }
 
-    public function isAssigneeActive() : bool
+    public function isAssigneeActive() : ?bool
     {
         return $this->isAssigneeActive;
     }
@@ -135,17 +161,17 @@ class Ticket
         return $this->ticketStatus;
     }
 
-    public function ticketStatusCategory() : string
+    public function ticketStatusCategory() : ?string
     {
         return $this->ticketStatusCategory;
     }
 
-    public function components() : string
+    public function components() : ?string
     {
         return $this->components;
     }
 
-    public function type() : string
+    public function type() : ?string
     {
         return $this->type;
     }
@@ -155,17 +181,17 @@ class Ticket
         return $this->project;
     }
 
-    public function fixVersion() : string
+    public function fixVersion() : ?string
     {
         return $this->fixVersion;
     }
 
-    public function summary() : string
+    public function summary() : ?string
     {
         return $this->summary;
     }
 
-    public function branch() : string
+    public function branch() : ?string
     {
         return $this->branch;
     }
@@ -175,14 +201,19 @@ class Ticket
         return $this->lastUpdate;
     }
 
-    public function url() : string
+    public function url() : ?string
     {
         return $this->url;
     }
 
-    public function pullRquestStatus() : string
+    public function pullRquestStatus() : ?string
     {
         return $this->pullRequestStatus;
+    }
+
+    public function repository() : ?string
+    {
+        return $this->repository;
     }
 
     public function hasDirectory() : bool
@@ -190,14 +221,45 @@ class Ticket
         return $this->hasDirectory;
     }
 
-    public function directory() : string
+    public function directory() : ?string
     {
         return $this->directory;
     }
 
-    public function pullRequestName() : string
+    public function pullRequestName() : ?string
     {
         return $this->pullRequestName;
+    }
+
+    public function isDone() : bool
+    {
+        return $this->isDone;
+    }
+
+    public function hasBranch() : bool
+    {
+        return $this->hasBranch;
+    }
+
+    public function setRepository(?string $repository) : void
+    {
+        $this->repository = $repository;
+    }
+
+    public function setIsDone(string $status) : void
+    {
+        $this->isDone = false;
+        if (static::DONE_STATUS === $status) {
+            $this->isDone = true;
+        }
+    }
+
+    public function setHasBranch(?string $branch) : void
+    {
+        $this->hasBranch = true;
+        if (null === $branch) {
+            $this->hasBranch = false;
+        }
     }
 
     /**
@@ -250,7 +312,7 @@ class Ticket
         if (null === $ticketStatus) {
             throw new NullArgumentException('Ticket status cannot be null');
         }
-        $this->ticketStatus = $ticketStatus;
+        $this->ticketStatus = JiraTicketStatus::createFromString($ticketStatus)->status();
     }
 
     private function setTicketStatusCategory(?string $ticketStatusCategory) : void

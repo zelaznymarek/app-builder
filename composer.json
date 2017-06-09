@@ -19,14 +19,12 @@
         "fguillot/simpleLogger": "^1.0",
         "guzzlehttp/guzzle": "^6.2",
         "incenteev/composer-parameter-handler": "^2.1",
-        "lesstif/php-jira-rest-client": "^1.11",
         "sebastian/git": "^2.1",
         "symfony/config": "^3.3",
         "symfony/console": "^3.3",
         "symfony/dependency-injection": "^3.3",
         "symfony/event-dispatcher": "^3.3",
         "symfony/expression-language": "^3.3",
-        "symfony/filesystem": "^3.3",
         "symfony/property-access": "^3.3",
         "symfony/serializer": "^3.3",
         "symfony/yaml": "^3.3"
@@ -61,8 +59,8 @@
     },
     "extra": {
         "incenteev-parameters": {
-            "file": "config/config.yml",
-            "dist-file": "config/config.dist.yml",
+            "file": "config/parameters.yml",
+            "dist-file": "config/parameters.yml.dist",
             "keep-outdated": true,
             "env-map": {
                 "jira.host": "JIRA_HOST",

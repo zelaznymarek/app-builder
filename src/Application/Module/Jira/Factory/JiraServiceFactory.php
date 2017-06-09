@@ -1,12 +1,13 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\Jira\Factory;
 
-use JiraRestApi\Configuration\ArrayConfiguration;
-use JiraRestApi\Issue\IssueService;
+use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
+use Pvg\Application\Configuration\ValueObject\Parameters;
+use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
 use Pvg\Application\Module\Jira\ExternalLibraryJiraService;
 use Pvg\Application\Module\Jira\QueryRepository;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -14,18 +15,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class JiraServiceFactory
 {
     public function create(
-        array $applicationConfig,
+        Parameters $applicationParams,
         EventDispatcherInterface $dispatcher,
         LoggerInterface $logger,
         QueryRepository $queryRepository
     ) : ExternalLibraryJiraService {
         return new ExternalLibraryJiraService(
-            new IssueService(
-                new ArrayConfiguration([
-                    'jiraHost'     => $applicationConfig['parameters']['jira.host'],
-                    'jiraUser'     => $applicationConfig['parameters']['jira.authentication.username'],
-                    'jiraPassword' => $applicationConfig['parameters']['jira.authentication.password'],
-                ])
+            new ExternalLibraryHttpClient(
+                new Client(['base_uri' => $applicationParams->jiraHost()]),
+                    $applicationParams
             ),
             $logger,
             $dispatcher,

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Tests\Application\Model\ValueObject;
 
@@ -37,11 +37,14 @@ class TicketTest extends TestCase
         $this->assertSame($ticketData['project'], $ticket->project());
         $this->assertSame($ticketData['fix_version'], $ticket->fixVersion());
         $this->assertSame($ticketData['summary'], $ticket->summary());
+        $this->assertTrue($ticket->hasBranch());
+        $this->assertTrue($ticket->isDone());
         $this->assertSame($prData['pull_request_branch'], $ticket->branch());
         $this->assertSame($prData['pull_request_last_update'], $ticket->lastUpdate());
         $this->assertSame($prData['pull_request_url'], $ticket->url());
         $this->assertSame($prData['pull_request_status'], $ticket->pullRquestStatus());
         $this->assertSame($prData['pull_request_name'], $ticket->pullRequestName());
+        $this->assertSame($prData['repository'], $ticket->repository());
         $this->assertSame($dirData['ticketExists'], $ticket->hasDirectory());
         $this->assertSame($dirData['ticketDir'], $ticket->directory());
     }
@@ -57,6 +60,67 @@ class TicketTest extends TestCase
     ) : void {
         $this->expectException(NullArgumentException::class);
         new Ticket($ticketData, $prData, $dirData);
+    }
+
+    /**
+     * @test
+     * @dataProvider validDataProvider
+     */
+    public function willReturnSameStatusAsGiven(
+        array $ticketData,
+        array $prData,
+        array $dirData
+    ) : void {
+        $ticket = new Ticket($ticketData, $prData, $dirData);
+        $this->assertTrue($ticket->compareStatus($ticketData['status']));
+    }
+
+    /**
+     * @test
+     * @dataProvider noBranchDataProvider
+     */
+    public function hasBranchIsFalseWhenFalseGiven(
+        array $ticketData,
+        array $prData,
+        array $dirData
+    ) : void {
+        $ticket = new Ticket($ticketData, $prData, $dirData);
+        $this->assertFalse($ticket->hasBranch());
+    }
+
+    public function noBranchDataProvider() : array
+    {
+        return [
+            'validData1' => [
+                [
+                    'id'                    => 20,
+                    'ticket_key'            => 'key',
+                    'assignee_name'         => 'name',
+                    'assignee_display_name' => '',
+                    'assignee_email'        => 'email',
+                    'assignee_active'       => true,
+                    'status'                => 'Done',
+                    'status_category'       => 'Done',
+                    'components'            => 'Comps',
+                    'ticket_type'           => 'Fix',
+                    'project'               => 'project',
+                    'fix_version'           => '1.0',
+                    'summary'               => 'Summary...',
+                ],
+                [
+                    'pull_request_branch'      => null,
+                    'pull_request_last_update' => null,
+                    'pull_request_url'         => null,
+                    'pull_request_status'      => null,
+                    'pull_request_name'        => null,
+                    'repository'               => null,
+                ],
+                [
+                    'ticketExists' => true,
+                    'ticketDir'    => '/dir/id',
+                ],
+            ],
+        ];
     }
 
     public function validDataProvider() : array
@@ -81,9 +145,39 @@ class TicketTest extends TestCase
                 [
                     'pull_request_branch'      => 'branch',
                     'pull_request_last_update' => '2017',
+                    'pull_request_url'         => null,
+                    'pull_request_status'      => null,
+                    'pull_request_name'        => null,
+                    'repository'               => null,
+                ],
+                [
+                    'ticketExists' => true,
+                    'ticketDir'    => '/dir/id',
+                ],
+            ],
+            'validData2' => [
+                [
+                    'id'                    => 20,
+                    'ticket_key'            => 'key',
+                    'assignee_name'         => 'name',
+                    'assignee_display_name' => '',
+                    'assignee_email'        => 'email',
+                    'assignee_active'       => true,
+                    'status'                => 'Done',
+                    'status_category'       => 'Done',
+                    'components'            => 'Comps',
+                    'ticket_type'           => 'Fix',
+                    'project'               => 'project',
+                    'fix_version'           => '1.0',
+                    'summary'               => 'Summary...',
+                ],
+                [
+                    'pull_request_branch'      => 'branch',
+                    'pull_request_last_update' => '2017',
                     'pull_request_url'         => 'www.url.com',
                     'pull_request_status'      => 'Merged',
                     'pull_request_name'        => 'key',
+                    'repository'               => 'repo',
                 ],
                 [
                     'ticketExists' => true,
@@ -118,6 +212,7 @@ class TicketTest extends TestCase
                     'pull_request_url'         => 'www.url.com',
                     'pull_request_status'      => 'Merged',
                     'pull_request_name'        => 'key',
+                    'repository'               => 'repo',
                 ],
                 [
                     'ticketExists' => true,
@@ -146,6 +241,7 @@ class TicketTest extends TestCase
                     'pull_request_url'         => 'www.url.com',
                     'pull_request_status'      => 'Merged',
                     'pull_request_name'        => 'key',
+                    'repository'               => 'repo',
                 ],
                 [
                     'ticketExists' => true,
@@ -174,6 +270,7 @@ class TicketTest extends TestCase
                     'pull_request_url'         => 'www.url.com',
                     'pull_request_status'      => 'Merged',
                     'pull_request_name'        => 'key',
+                    'repository'               => 'repo',
                 ],
                 [
                     'ticketExists' => true,
@@ -202,6 +299,7 @@ class TicketTest extends TestCase
                     'pull_request_url'         => 'www.url.com',
                     'pull_request_status'      => 'Merged',
                     'pull_request_name'        => 'key',
+                    'repository'               => 'repo',
                 ],
                 [
                     'ticketExists' => true,
@@ -230,6 +328,7 @@ class TicketTest extends TestCase
                     'pull_request_url'         => 'www.url.com',
                     'pull_request_status'      => 'Merged',
                     'pull_request_name'        => 'key',
+                    'repository'               => 'repo',
                 ],
                 [
                     'ticketExists' => null,

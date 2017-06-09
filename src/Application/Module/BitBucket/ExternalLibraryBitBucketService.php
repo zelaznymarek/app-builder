@@ -1,16 +1,15 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Pvg\Application\Module\BitBucket;
 
 use Psr\Log\LoggerInterface;
 use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
-use Pvg\Application\Utils\Mapper\BitbucketMapperFactory;
+use Pvg\Application\Utils\Mapper\Factory\BitbucketMapperFactory;
 use Pvg\Event\Application\BitbucketTicketMappedEvent;
 use Pvg\Event\Application\JiraTicketMappedEvent;
 use Pvg\Event\Application\JiraTicketMappedEventAware;
-use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, BitBucketService
@@ -48,19 +47,11 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
     {
         $ticketId = $event->ticket()['id'];
         $this->createUrl($ticketId);
-        try {
-            $this->fetchBitBucketData($ticketId);
-        } catch (RuntimeException $exception) {
-            $this->logger->warning(
-                'Error occured: ' . $exception->getMessage(),
-                [$exception]);
-        }
+        $this->fetchBitBucketData($ticketId);
     }
 
     /**
      * Fetches data from BitBucket by tickets id.
-     *
-     * @throws RuntimeException
      */
     public function fetchBitBucketData(int $ticketId) : void
     {
@@ -68,11 +59,8 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
         $response     = $this
             ->httpClient
             ->request(ExternalLibraryHttpClient::GET, $this->url);
-        try {
-            $bbFullTicket[$ticketId] = json_decode($response->getBody()->getContents(), true);
-        } catch (RuntimeException $exception) {
-            $this->logger->warning($exception->getMessage(), [$exception]);
-        }
+
+        $bbFullTicket[$ticketId] = json_decode($response->getBody()->getContents(), true);
         $this->mapToBitbucketTicket($bbFullTicket, $ticketId);
     }
 
@@ -88,7 +76,8 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
         }
         $this->dispatcher->dispatch(
             BitbucketTicketMappedEvent::NAME,
-            new BitbucketTicketMappedEvent($mappedTicket));
+            new BitbucketTicketMappedEvent($mappedTicket)
+        );
     }
 
     /**
