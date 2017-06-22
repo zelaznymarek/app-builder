@@ -2,18 +2,18 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TicketAggregate;
+namespace AppBuilder\Application\Module\TicketAggregate;
 
+use AppBuilder\Application\Model\Exception\NullArgumentException;
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Event\Application\BitbucketTicketMappedEvent;
+use AppBuilder\Event\Application\BitbucketTicketMappedEventAware;
+use AppBuilder\Event\Application\FullTicketBuiltEvent;
+use AppBuilder\Event\Application\JiraTicketMappedEvent;
+use AppBuilder\Event\Application\JiraTicketMappedEventAware;
+use AppBuilder\Event\Application\TicketDirIndexedEvent;
+use AppBuilder\Event\Application\TicketDirIndexedEventAware;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Model\Exception\NullArgumentException;
-use Pvg\Application\Model\ValueObject\Ticket;
-use Pvg\Event\Application\BitbucketTicketMappedEvent;
-use Pvg\Event\Application\BitbucketTicketMappedEventAware;
-use Pvg\Event\Application\FullTicketBuiltEvent;
-use Pvg\Event\Application\JiraTicketMappedEvent;
-use Pvg\Event\Application\JiraTicketMappedEventAware;
-use Pvg\Event\Application\TicketDirIndexedEvent;
-use Pvg\Event\Application\TicketDirIndexedEventAware;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class TicketService implements
@@ -128,12 +128,15 @@ class TicketService implements
      */
     private function printCompletionInfo() : void
     {
-        $this->logger->info(
-            'Ticket '
-            . $this->currentId
-            . ': '
-            . $this->parts
-            . '/3 parts built');
+        $this
+            ->logger
+            ->info(
+                'Ticket '
+                . $this->currentId
+                . ': '
+                . $this->parts
+                . '/3 parts built'
+            );
     }
 
     /**

@@ -2,14 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager;
+namespace AppBuilder\Application\Module\TaskManager;
 
+use AppBuilder\Application\Module\TaskManager\Factory\TaskFactory;
+use AppBuilder\Application\Module\TaskManager\Task\Task;
+use AppBuilder\Event\Application\FullTicketBuiltEvent;
+use AppBuilder\Event\Application\FullTicketBuiltEventAware;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Module\TaskManager\Factory\TaskFactory;
-use Pvg\Application\Module\TaskManager\Task\Task;
-use Pvg\Event\Application\FullTicketBuiltEvent;
-use Pvg\Event\Application\FullTicketBuiltEventAware;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 class TaskManagerService implements FullTicketBuiltEventAware
 {
@@ -46,6 +47,10 @@ class TaskManagerService implements FullTicketBuiltEventAware
      */
     private function process(Task $task) : void
     {
-        $task->execute();
+        try {
+            $task->execute();
+        } catch (IOException $exception) {
+            $this->logger->warning($exception->getMessage(), [$exception]);
+        }
     }
 }

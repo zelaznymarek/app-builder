@@ -2,13 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\ExistingTicketsIndex;
+namespace AppBuilder\Application\Module\ExistingTicketsIndex;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Event\Application\JiraTicketMappedEvent;
+use AppBuilder\Event\Application\JiraTicketMappedEventAware;
+use AppBuilder\Event\Application\TicketDirIndexedEvent;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Event\Application\JiraTicketMappedEvent;
-use Pvg\Event\Application\JiraTicketMappedEventAware;
-use Pvg\Event\Application\TicketDirIndexedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ExistingTicketsIndexService implements JiraTicketMappedEventAware

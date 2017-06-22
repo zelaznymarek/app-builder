@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Utils\Mapper;
 
+use AppBuilder\Application\Module\Jira\Exception\MapperRepetitionException;
+use AppBuilder\Application\Utils\Mapper\ArrayMapper;
+use AppBuilder\Application\Utils\Mapper\FieldMapper;
 use Closure;
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Module\Jira\Exception\MapperRepetitionException;
-use Pvg\Application\Utils\Mapper\ArrayMapper;
-use Pvg\Application\Utils\Mapper\FieldMapper;
 
 /**
- * @covers \Pvg\Application\Utils\Mapper\ArrayMapper
+ * @covers \AppBuilder\Application\Utils\Mapper\ArrayMapper
  */
 class ArrayMapperTest extends TestCase
 {
@@ -105,21 +105,21 @@ class ArrayMapperTest extends TestCase
     {
         return [
             'data1' => [
-                    'IN-4' => [
-                        'id'     => '12',
-                        'key'    => 'IN-4',
-                        'fields' => [
-                            'assignee' => [
-                                'name'   => 'marek',
-                                'active' => true,
-                            ],
-                            'status' => [
-                                'name'            => 'Done',
-                                'status_category' => 'Done...',
-                            ],
+                'IN-4' => [
+                    'id'     => '12',
+                    'key'    => 'IN-4',
+                    'fields' => [
+                        'assignee' => [
+                            'name'   => 'marek',
+                            'active' => true,
+                        ],
+                        'status' => [
+                            'name'            => 'Done',
+                            'status_category' => 'Done...',
                         ],
                     ],
                 ],
+            ],
         ];
     }
 }

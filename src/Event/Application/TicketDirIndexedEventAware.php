@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Event\Application;
+namespace AppBuilder\Event\Application;
 
 interface TicketDirIndexedEventAware
 {

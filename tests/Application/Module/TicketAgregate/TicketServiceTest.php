@@ -4,19 +4,19 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Module\TicketAggregate;
 
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Module\TicketAggregate\FullTicket;
+use AppBuilder\Application\Module\TicketAggregate\TicketService;
+use AppBuilder\Event\Application\BitbucketTicketMappedEvent;
+use AppBuilder\Event\Application\FullTicketBuiltEvent;
+use AppBuilder\Event\Application\JiraTicketMappedEvent;
+use AppBuilder\Event\Application\TicketDirIndexedEvent;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Model\ValueObject\Ticket;
-use Pvg\Application\Module\TicketAggregate\FullTicket;
-use Pvg\Application\Module\TicketAggregate\TicketService;
-use Pvg\Event\Application\BitbucketTicketMappedEvent;
-use Pvg\Event\Application\FullTicketBuiltEvent;
-use Pvg\Event\Application\JiraTicketMappedEvent;
-use Pvg\Event\Application\TicketDirIndexedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * @covers \Pvg\Application\Module\TicketAggregate\TicketService
+ * @covers \AppBuilder\Application\Module\TicketAggregate\TicketService
  */
 class TicketServiceTest extends TestCase
 {
@@ -26,7 +26,7 @@ class TicketServiceTest extends TestCase
     /** @var LoggerInterface */
     private $logger;
 
-    public function setUp() : void
+    protected function setUp() : void
     {
         $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->logger     = $this->createMock(LoggerInterface::class);

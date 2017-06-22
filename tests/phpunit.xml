@@ -15,10 +15,10 @@
 >
 
     <php>
-        <ini name='display_errors' value='1' />
-        <ini name='display_startup_errors' value='1' />
-        <ini name='error_reporting' value='-1' />
-        <ini name='memory_limit' value='-1' />
+        <ini name='display_errors' value='1'/>
+        <ini name='display_startup_errors' value='1'/>
+        <ini name='error_reporting' value='-1'/>
+        <ini name='memory_limit' value='-1'/>
     </php>
 
     <testsuites>
@@ -27,13 +27,17 @@
         </testsuite>
     </testsuites>
 
-    <logging>
-        <log type='coverage-text' target='php://stdout' showOnlySummary='true' />
-    </logging>
-
     <filter>
         <whitelist>
             <directory>../src</directory>
+            <exclude>
+                <directory suffix=".php">../src/Application/Module/BitBucket/Factory</directory>
+                <directory suffix=".php">../src/Application/Module/ExistingTicketsIndex/Factory</directory>
+                <directory suffix=".php">../src/Application/Module/Jira/Factory</directory>
+                <directory suffix=".php">../src/Application/Module/TicketAggregate/Factory</directory>
+                <directory suffix=".php">../src/Event</directory>
+                <directory suffix=".php">../src/Application/Utils/Mapper/Factory</directory>
+            </exclude>
         </whitelist>
     </filter>
 

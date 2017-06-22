@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace Tests\Command;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Command\DeployTestBranchCommand;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Command\DeployTestBranchCommand;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * @covers \Pvg\Command\DeployTestBranchCommand
+ * @covers \AppBuilder\Command\DeployTestBranchCommand
  */
 class DeployTestBranchCommandTest extends TestCase
 {
@@ -27,7 +27,7 @@ class DeployTestBranchCommandTest extends TestCase
     /** @var DeployTestBranchCommand */
     private $deployTestBranchCommand;
 
-    public function setUp() : void
+    protected function setUp() : void
     {
         $this->logger                  = $this->createMock(LoggerInterface::class);
         $this->applicationParams       = $this->createMock(Parameters::class);
@@ -35,7 +35,8 @@ class DeployTestBranchCommandTest extends TestCase
         $this->deployTestBranchCommand = new DeployTestBranchCommand(
             $this->applicationParams,
             $this->logger,
-            $this->dispatcher);
+            $this->dispatcher
+        );
     }
 
     /**

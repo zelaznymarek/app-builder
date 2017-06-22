@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Utils\Mapper;
+namespace AppBuilder\Application\Utils\Mapper;
 
-use Pvg\Application\Module\Jira\Exception\MapperRepetitionException;
+use AppBuilder\Application\Module\Jira\Exception\MapperRepetitionException;
 
 class ArrayMapper implements Mapper
 {

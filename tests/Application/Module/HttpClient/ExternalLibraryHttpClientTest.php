@@ -4,15 +4,15 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Module\HttpClient;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Module\HttpClient\ExternalLibraryHttpClient;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
 
 /**
- * @covers \Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient
+ * @covers \AppBuilder\Application\Module\HttpClient\ExternalLibraryHttpClient
  */
 class ExternalLibraryHttpClientTest extends TestCase
 {

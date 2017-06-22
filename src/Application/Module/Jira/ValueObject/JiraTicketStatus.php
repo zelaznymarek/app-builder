@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\Jira\ValueObject;
+namespace AppBuilder\Application\Module\Jira\ValueObject;
 
-use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
+use AppBuilder\Application\Module\Jira\Exception\InvalidJiraStatusException;
 
 class JiraTicketStatus
 {

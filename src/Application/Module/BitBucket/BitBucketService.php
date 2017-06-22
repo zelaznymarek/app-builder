@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\BitBucket;
+namespace AppBuilder\Application\Module\BitBucket;
 
 interface BitBucketService
 {

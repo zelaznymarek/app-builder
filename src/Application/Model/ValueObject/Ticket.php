@@ -2,10 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Model\ValueObject;
+namespace AppBuilder\Application\Model\ValueObject;
 
-use Pvg\Application\Model\Exception\NullArgumentException;
-use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
+use AppBuilder\Application\Model\Exception\NullArgumentException;
+use AppBuilder\Application\Module\Jira\ValueObject\JiraTicketStatus;
 
 /**
  * Class represents complete ticket.

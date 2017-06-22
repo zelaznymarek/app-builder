@@ -2,14 +2,17 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\BitBucket;
+namespace AppBuilder\Application\Module\BitBucket;
 
+use AppBuilder\Application\Module\BitBucket\Exception\NullResultReturned;
+use AppBuilder\Application\Module\HttpClient\ExternalLibraryHttpClient;
+use AppBuilder\Application\Utils\Mapper\Factory\BitbucketMapperFactory;
+use AppBuilder\Event\Application\BitbucketTicketMappedEvent;
+use AppBuilder\Event\Application\JiraTicketMappedEvent;
+use AppBuilder\Event\Application\JiraTicketMappedEventAware;
+use GuzzleHttp\Psr7\Response;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
-use Pvg\Application\Utils\Mapper\Factory\BitbucketMapperFactory;
-use Pvg\Event\Application\BitbucketTicketMappedEvent;
-use Pvg\Event\Application\JiraTicketMappedEvent;
-use Pvg\Event\Application\JiraTicketMappedEventAware;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, BitBucketService
@@ -47,11 +50,18 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
     {
         $ticketId = $event->ticket()['id'];
         $this->createUrl($ticketId);
-        $this->fetchBitBucketData($ticketId);
+        try {
+            $this->fetchBitBucketData($ticketId);
+        } catch (RuntimeException $exception) {
+            $this->logger->warning('Error: ' . $exception->getMessage(), [$exception]);
+        }
     }
 
     /**
      * Fetches data from BitBucket by tickets id.
+     *
+     * @throws RuntimeException
+     * @throws NullResultReturned
      */
     public function fetchBitBucketData(int $ticketId) : void
     {
@@ -59,9 +69,25 @@ class ExternalLibraryBitBucketService implements JiraTicketMappedEventAware, Bit
         $response     = $this
             ->httpClient
             ->request(ExternalLibraryHttpClient::GET, $this->url);
+        $bbFullTicket[$ticketId] = $this->getResponseContent($response);
 
-        $bbFullTicket[$ticketId] = json_decode($response->getBody()->getContents(), true);
+        if (null === $bbFullTicket[$ticketId]) {
+            throw new NullResultReturned('Error. Bitbucket fetching method returned null');
+        }
+
         $this->mapToBitbucketTicket($bbFullTicket, $ticketId);
+    }
+
+    /**
+     * Gets content from response and decodes it into array.
+     *
+     * @throws RuntimeException
+     */
+    private function getResponseContent(Response $response) : ?array
+    {
+        $content = $response->getBody()->getContents();
+
+        return json_decode($content, true);
     }
 
     /**

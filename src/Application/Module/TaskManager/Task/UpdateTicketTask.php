@@ -2,10 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager\Task;
+namespace AppBuilder\Application\Module\TaskManager\Task;
 
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Utils\FileManager\FileManagerService;
+use Nette\DirectoryNotFoundException;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 class UpdateTicketTask implements Task
 {
@@ -18,31 +21,41 @@ class UpdateTicketTask implements Task
     /** @var Parameters */
     private $applicationParams;
 
-    public function __construct(Ticket $ticket, Parameters $applicationParams)
+    /** @var FileManagerService */
+    private $fileManager;
+
+    public function __construct(Ticket $ticket, Parameters $applicationParams, FileManagerService $fileManager)
     {
         $this->applicationParams = $applicationParams;
         $this->ticket            = $ticket;
         $this->path              = $applicationParams->path($ticket->key());
+        $this->fileManager       = $fileManager;
     }
 
     /**
      * Updates application code, if tickets status changes to 'work finished'.
+     *
+     * @throws DirectoryNotFoundException
+     * @throws IOException
      */
-    public function execute() : void
+    public function execute() : bool
     {
-        $this->executeGitPull($this->path);
-        $this->createSnapshot();
-        $this->executeComposerInstall($this->path);
+        return
+            $this->executeGitPull($this->path)
+            && $this->createSnapshot()
+            && $this->executeComposerInstall($this->path);
     }
 
     /**
      * Runs git clone command in ticket directory. Returns true when process is finished.
      * Uses SSH key for authorization.
+     *
+     * @throws DirectoryNotFoundException
      */
     private function executeGitPull(string $path) : bool
     {
         $pullCommand = $this->combinePullCommand($this->ticket->branch());
-        chdir($path);
+        $this->fileManager->changeDir($path);
         exec($pullCommand);
 
         return true;
@@ -57,6 +70,20 @@ class UpdateTicketTask implements Task
     }
 
     /**
+     * Creates file with tickets current status and timestamp inside ticket dir.
+     *
+     * @throws IOException
+     */
+    private function createSnapshot() : bool
+    {
+        $snapshotPath = $this->applicationParams->snapshotPath($this->ticket->key());
+        $snap         = $this->ticket->ticketStatus() . ';' . date('Y-m-d h:m:s');
+        $this->fileManager->filePutContent($snapshotPath, $snap);
+
+        return true;
+    }
+
+    /**
      * Runs composer install command in ticket directory.
      * Returns true when process is finished.
      */
@@ -65,15 +92,5 @@ class UpdateTicketTask implements Task
         exec('composer install --working-dir=' . $path);
 
         return true;
-    }
-
-    /**
-     * Creates file with tickets current status and timestamp inside ticket dir.
-     */
-    private function createSnapshot() : void
-    {
-        $snapshotPath = $this->applicationParams->snapshotPath($this->ticket->key());
-        $snap         = $this->ticket->ticketStatus() . ';' . date('Y-m-d h:m:s');
-        file_put_contents($snapshotPath, $snap);
     }
 }

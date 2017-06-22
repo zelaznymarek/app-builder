@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Event\Application;
+namespace AppBuilder\Event\Application;
 
-use Pvg\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Model\ValueObject\Ticket;
 use Symfony\Component\EventDispatcher\Event;
 
 class FullTicketBuiltEvent extends Event

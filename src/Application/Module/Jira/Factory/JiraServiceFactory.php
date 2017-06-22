@@ -2,14 +2,14 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\Jira\Factory;
+namespace AppBuilder\Application\Module\Jira\Factory;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Module\HttpClient\ExternalLibraryHttpClient;
+use AppBuilder\Application\Module\Jira\ExternalLibraryJiraService;
+use AppBuilder\Application\Module\Jira\QueryRepository;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
-use Pvg\Application\Module\Jira\ExternalLibraryJiraService;
-use Pvg\Application\Module\Jira\QueryRepository;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class JiraServiceFactory
@@ -23,7 +23,7 @@ class JiraServiceFactory
         return new ExternalLibraryJiraService(
             new ExternalLibraryHttpClient(
                 new Client(['base_uri' => $applicationParams->jiraHost()]),
-                    $applicationParams
+                $applicationParams
             ),
             $logger,
             $dispatcher,

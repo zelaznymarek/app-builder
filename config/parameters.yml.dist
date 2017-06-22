@@ -2,7 +2,7 @@ parameters:
   jira.host: https://farpoint.get-ag.com/jira
   jira.authentication.username: "root"
   jira.authentication.password: "yeah, right ..."
-  jira.watch.projects: ["PVG", "DSL"]
+  jira.watch.projects: ["AppBuilder", "DSL"]
   jira.trigger.deploy.state: "work in progress"
   jira.trigger.remove.states: ["done", "rejected"]
   server.username: ""

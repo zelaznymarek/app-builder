@@ -5,11 +5,11 @@ parameters:
 
 services:
   app.bitbucket_service_factory:
-    class: \Pvg\Application\Module\BitBucket\Factory\BitBucketServiceFactory
+    class: \AppBuilder\Application\Module\BitBucket\Factory\BitBucketServiceFactory
     public: false
 
   app.bitbucket_service:
-    class: \Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService
+    class: \AppBuilder\Application\Module\BitBucket\ExternalLibraryBitBucketService
     factory: 'app.bitbucket_service_factory:create'
     arguments:
       - "@app.parameters"
@@ -17,7 +17,7 @@ services:
       - "@app.event_dispatcher"
 
   app.configuration:
-    class: \Pvg\Application\Configuration\ConfigReader
+    class: \AppBuilder\Application\Configuration\ConfigReader
     arguments:
       - "@app.file_locator"
       - "%parameters.path%"
@@ -28,27 +28,33 @@ services:
       - method: init
 
   app.existing_tickets_index_service_factory:
-    class: \Pvg\Application\Module\ExistingTicketsIndex\Factory\ExistingTicketsIndexServiceFactory
+    class: \AppBuilder\Application\Module\ExistingTicketsIndex\Factory\ExistingTicketsIndexServiceFactory
     public: false
 
   app.existing_tickets_index_service:
-    class: \Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
+    class: \AppBuilder\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
     factory: 'app.existing_tickets_index_service_factory:create'
     arguments:
       - "@app.parameters"
       - "@app.event_dispatcher"
       - "@app.logger"
 
+  app.file_manager:
+    class: \AppBuilder\Application\Utils\FileManager\FileManagerService
+    arguments:
+      - "@app.logger"
+    public: false
+
   app.full_ticket_builder:
-    class: \Pvg\Application\Module\TicketAggregate\FullTicket
+    class: \AppBuilder\Application\Module\TicketAggregate\FullTicket
     public: false
 
   app.jira_service_factory:
-    class: \Pvg\Application\Module\Jira\Factory\JiraServiceFactory
+    class: \AppBuilder\Application\Module\Jira\Factory\JiraServiceFactory
     public: false
 
   app.jira_service:
-    class: \Pvg\Application\Module\Jira\ExternalLibraryJiraService
+    class: \AppBuilder\Application\Module\Jira\ExternalLibraryJiraService
     factory: 'app.jira_service_factory:create'
     arguments:
       - "@app.parameters"
@@ -60,30 +66,31 @@ services:
     class: \SimpleLogger\Stdout
 
   app.parameters:
-    class: \Pvg\Application\Configuration\ValueObject\Parameters
+    class: \AppBuilder\Application\Configuration\ValueObject\Parameters
     arguments:
       - "%application.config%"
 
   app.task_factory:
-    class: \Pvg\Application\Module\TaskManager\Factory\TaskFactory
+    class: \AppBuilder\Application\Module\TaskManager\Factory\TaskFactory
     arguments:
       - "@app.logger"
       - "@app.parameters"
+      - "@app.file_manager"
     public: false
 
   app.task_manager_service:
-    class: \Pvg\Application\Module\TaskManager\TaskManagerService
+    class: \AppBuilder\Application\Module\TaskManager\TaskManagerService
     arguments:
       - "@app.task_factory"
       - "@app.logger"
       - "@app.event_dispatcher"
 
   app.ticket_service_factory:
-    class: \Pvg\Application\Module\TicketAggregate\Factory\TicketServiceFactory
+    class: \AppBuilder\Application\Module\TicketAggregate\Factory\TicketServiceFactory
     public: false
 
   app.ticket_service_repository:
-    class: \Pvg\Application\Module\TicketAggregate\TicketServiceRepository
+    class: \AppBuilder\Application\Module\TicketAggregate\TicketServiceRepository
     arguments:
       - "@app.ticket_service_factory"
       - "@app.full_ticket_builder"
@@ -91,11 +98,11 @@ services:
       - "@app.logger"
 
   app.query_repository:
-      class: \Pvg\Application\Module\Jira\QueryRepository
+      class: \AppBuilder\Application\Module\Jira\QueryRepository
       public: false
       
   deploy_test_branch_command:
-    class: \Pvg\Command\DeployTestBranchCommand
+    class: \AppBuilder\Command\DeployTestBranchCommand
     arguments:
       - "@app.parameters"
       - "@app.logger"

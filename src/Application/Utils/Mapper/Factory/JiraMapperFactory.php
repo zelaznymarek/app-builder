@@ -2,11 +2,11 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Utils\Mapper\Factory;
+namespace AppBuilder\Application\Utils\Mapper\Factory;
 
+use AppBuilder\Application\Utils\Mapper\ArrayMapper;
+use AppBuilder\Application\Utils\Mapper\FieldMapper;
 use Closure;
-use Pvg\Application\Utils\Mapper\ArrayMapper;
-use Pvg\Application\Utils\Mapper\FieldMapper;
 
 class JiraMapperFactory
 {

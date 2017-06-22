@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Utils\Mapper;
 
+use AppBuilder\Application\Utils\Mapper\FieldMapper;
 use Closure;
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Utils\Mapper\FieldMapper;
 
 /**
- * @covers \Pvg\Application\Utils\Mapper\FieldMapper
+ * @covers \AppBuilder\Application\Utils\Mapper\FieldMapper
  */
 class FieldMapperTest extends TestCase
 {

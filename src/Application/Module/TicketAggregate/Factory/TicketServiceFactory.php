@@ -2,11 +2,11 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TicketAggregate\Factory;
+namespace AppBuilder\Application\Module\TicketAggregate\Factory;
 
+use AppBuilder\Application\Module\TicketAggregate\TicketBuilder;
+use AppBuilder\Application\Module\TicketAggregate\TicketService;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Module\TicketAggregate\TicketBuilder;
-use Pvg\Application\Module\TicketAggregate\TicketService;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class TicketServiceFactory

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Configuration\Exception;
+namespace AppBuilder\Application\Configuration\Exception;
 
 use Exception;
 

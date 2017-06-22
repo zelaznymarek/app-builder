@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 
-<project name='pvg/test-branch-builder' default='check'>
+<project name='AppBuilder/test-branch-builder' default='check'>
 
     <target name='check' depends='phpcs,php-cs-fixer,phpcpd,phpstan,types-checker,phpmnd,phpunit' />
 
@@ -52,6 +52,9 @@
 
     <target name='types-checker'>
         <exec executable='bin/types-checker' passthru='true' checkreturn='true'>
+            <arg value='--exclude=AppBuilder\\Application\\Utils\\Mapper\\ArrayMapper' />
+            <arg value='--exclude=AppBuilder\\Application\\Utils\\Mapper\\FieldMapper' />
+            <arg value='--exclude=AppBuilder\\Application\\Utils\\Mapper\\Mapper' />
             <arg path='src' />
             <arg path='tests' />
         </exec>
@@ -70,7 +73,7 @@
             <arg value='-qrr' />
             <arg path='vendor/phpunit/phpunit/phpunit' />
             <arg value='--configuration=tests/phpunit.xml' />
-            <arg value='--coverage-html=/var/www/pvg/report' />
+            <arg value='--coverage-html=/var/www/AppBuilder/report' />
         </exec>
     </target>
 

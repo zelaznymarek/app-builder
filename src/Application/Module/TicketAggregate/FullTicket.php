@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TicketAggregate;
+namespace AppBuilder\Application\Module\TicketAggregate;
 
-use Pvg\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Model\ValueObject\Ticket;
 
 class FullTicket implements TicketBuilder
 {

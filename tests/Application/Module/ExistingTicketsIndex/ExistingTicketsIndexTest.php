@@ -4,16 +4,16 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Module\ExistingTicketsIndex;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService;
+use AppBuilder\Event\Application\JiraTicketMappedEvent;
+use AppBuilder\Event\Application\TicketDirIndexedEvent;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService;
-use Pvg\Event\Application\JiraTicketMappedEvent;
-use Pvg\Event\Application\TicketDirIndexedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * @covers \Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
+ * @covers \AppBuilder\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
  */
 class ExistingTicketsIndexTest extends TestCase
 {
@@ -23,7 +23,7 @@ class ExistingTicketsIndexTest extends TestCase
     /** @var LoggerInterface */
     private $logger;
 
-    public function setUp() : void
+    protected function setUp() : void
     {
         $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->logger     = $this->createMock(LoggerInterface::class);
@@ -50,8 +50,10 @@ class ExistingTicketsIndexTest extends TestCase
             ->dispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with(TicketDirIndexedEvent::NAME,
-                new TicketDirIndexedEvent($result));
+            ->with(
+                TicketDirIndexedEvent::NAME,
+                new TicketDirIndexedEvent($result)
+            );
 
         $directoryService->onJiraTicketMapped($event);
     }

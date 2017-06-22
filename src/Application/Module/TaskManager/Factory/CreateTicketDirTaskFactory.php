@@ -2,12 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager\Factory;
+namespace AppBuilder\Application\Module\TaskManager\Factory;
 
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Model\ValueObject\Ticket;
-use Pvg\Application\Module\TaskManager\Exception\MisguidedTaskException;
-use Pvg\Application\Module\TaskManager\Task\CreateTicketDirTask;
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Module\TaskManager\Exception\MisguidedTaskException;
+use AppBuilder\Application\Module\TaskManager\Task\CreateTicketDirTask;
+use AppBuilder\Application\Utils\FileManager\FileManagerService;
 
 class CreateTicketDirTaskFactory
 {
@@ -20,8 +21,11 @@ class CreateTicketDirTaskFactory
      *
      * @throws MisguidedTaskException
      */
-    public function create(Ticket $ticket, Parameters $applicationParams) : CreateTicketDirTask
-    {
+    public function create(
+        Ticket $ticket,
+        Parameters $applicationParams,
+        FileManagerService $fileManager
+    ) : CreateTicketDirTask {
         if ($ticket->hasDirectory()
             || $ticket->isDone()
             || !$ticket->hasBranch()
@@ -29,6 +33,6 @@ class CreateTicketDirTaskFactory
             throw new MisguidedTaskException(CreateTicketDirTask::class);
         }
 
-        return new CreateTicketDirTask($ticket, $applicationParams);
+        return new CreateTicketDirTask($ticket, $applicationParams, $fileManager);
     }
 }

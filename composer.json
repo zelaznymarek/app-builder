@@ -2,15 +2,11 @@
     "name": "pvg/test-branch-builder",
     "description": "Make your test server workflow friendly",
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
     "authors": [
         {
-            "name": "Szymon Dudziak",
-            "email": "szymon.dudziak@equiqo.com"
-        },
-        {
-            "name": "Kuba Werłos",
-            "email": "kuba.werlos@equiqo.com"
+            "name": "Marek Żelazny",
+            "email": "marek.zelazny@equiqo.com"
         }
     ],
     "require": {
@@ -19,6 +15,7 @@
         "fguillot/simpleLogger": "^1.0",
         "guzzlehttp/guzzle": "^6.2",
         "incenteev/composer-parameter-handler": "^2.1",
+        "mikey179/vfsStream": "^1.6",
         "sebastian/git": "^2.1",
         "symfony/config": "^3.3",
         "symfony/console": "^3.3",
@@ -41,7 +38,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Pvg\\": "src/"
+            "AppBuilder\\": "src/"
         }
     },
     "autoload-dev": {

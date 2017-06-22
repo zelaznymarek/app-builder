@@ -2,10 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager\Task;
+namespace AppBuilder\Application\Module\TaskManager\Task;
 
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Utils\FileManager\FileManagerService;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 class RemoveDoneTicketTask implements Task
 {
@@ -15,17 +17,25 @@ class RemoveDoneTicketTask implements Task
     /** @var string */
     private $homeDir;
 
-    public function __construct(Ticket $ticket, Parameters $applicationParams)
+    /** @var FileManagerService */
+    private $fileManager;
+
+    public function __construct(Ticket $ticket, Parameters $applicationParams, FileManagerService $fileManager)
     {
-        $this->ticket  = $ticket;
-        $this->homeDir = $applicationParams->projectsHomeDir();
+        $this->ticket      = $ticket;
+        $this->homeDir     = $applicationParams->projectsHomeDir();
+        $this->fileManager = $fileManager;
     }
 
     /**
      * Removes application directory when its done.
+     *
+     * @throws IOException
      */
-    public function execute() : void
+    public function execute() : bool
     {
-        rmdir($this->homeDir . $this->ticket->key());
+        $this->fileManager->remove($this->homeDir . $this->ticket->key());
+
+        return true;
     }
 }

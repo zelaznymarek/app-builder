@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Configuration;
+namespace AppBuilder\Application\Configuration;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;

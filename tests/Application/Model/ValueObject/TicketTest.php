@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Model\ValueObject;
 
+use AppBuilder\Application\Model\Exception\NullArgumentException;
+use AppBuilder\Application\Model\ValueObject\Ticket;
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Model\Exception\NullArgumentException;
-use Pvg\Application\Model\ValueObject\Ticket;
 
 /**
- * @covers \Pvg\Application\Model\ValueObject\Ticket
+ * @covers \AppBuilder\Application\Model\ValueObject\Ticket
  */
 class TicketTest extends TestCase
 {

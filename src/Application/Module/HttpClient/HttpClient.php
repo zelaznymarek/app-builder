@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\HttpClient;
+namespace AppBuilder\Application\Module\HttpClient;
 
 use GuzzleHttp\Psr7\Response;
 

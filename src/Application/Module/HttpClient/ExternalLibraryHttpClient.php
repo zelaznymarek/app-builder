@@ -2,11 +2,11 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\HttpClient;
+namespace AppBuilder\Application\Module\HttpClient;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
-use Pvg\Application\Configuration\ValueObject\Parameters;
 
 /**
  * Class combines Guzzle Client object and an array with credentials for further convenience.

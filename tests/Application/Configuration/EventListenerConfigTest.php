@@ -4,26 +4,27 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Configuration;
 
+use AppBuilder\Application\Configuration\EventListenerConfig;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Configuration\EventListenerConfig;
 
 /**
- * @covers \Pvg\Application\Configuration\EventListenerConfig
+ * @covers \AppBuilder\Application\Configuration\EventListenerConfig
  */
 class EventListenerConfigTest extends TestCase
 {
     /** @var EventListenerConfig */
-    private $config;
+    private $eventListenerConfig;
 
-    public function setUp() : void
+    protected function setUp() : void
     {
-        $this->config = new EventListenerConfig('an-event', 'a-service', 'do-something');
+        $this->eventListenerConfig = new EventListenerConfig('an-event', 'a-service', 'do-something');
     }
 
     /**
      * @test
      */
-    public function createFromConfigArray() : void
+    public function willCreateListenerConfigFromConfigArray() : void
     {
         $array = [
             'some_event' => [
@@ -41,5 +42,38 @@ class EventListenerConfigTest extends TestCase
             $this->assertSame($event->action(), $array['some_event']['some_listener']['action']);
             $this->assertSame($event->priority(), $array['some_event']['some_listener']['priority']);
         }
+    }
+
+    /**
+     * @test
+     */
+    public function willThrowExceptionCauseOfEmptyEvent() : void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Event name cannot be empty');
+
+        new EventListenerConfig('', 'an-id', 'an-action');
+    }
+
+    /**
+     * @test
+     */
+    public function willThrowExceptionCauseOfEmptyId() : void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Service ID (from service container) cannot be empty!');
+
+        new EventListenerConfig('an-event', '', 'an-action');
+    }
+
+    /**
+     * @test
+     */
+    public function willThrowExceptionCauseOfEmptyAction() : void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Service listener method cannot be empty');
+
+        new EventListenerConfig('an-event', 'an-id', '');
     }
 }

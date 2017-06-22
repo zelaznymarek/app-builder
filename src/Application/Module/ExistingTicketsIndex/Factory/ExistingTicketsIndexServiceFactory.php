@@ -2,11 +2,11 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\ExistingTicketsIndex\Factory;
+namespace AppBuilder\Application\Module\ExistingTicketsIndex\Factory;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ExistingTicketsIndexServiceFactory

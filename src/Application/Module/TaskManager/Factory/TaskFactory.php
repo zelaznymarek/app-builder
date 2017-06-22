@@ -2,15 +2,16 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager\Factory;
+namespace AppBuilder\Application\Module\TaskManager\Factory;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Module\TaskManager\Exception\MisguidedTaskException;
+use AppBuilder\Application\Module\TaskManager\Task\NoActionTask;
+use AppBuilder\Application\Module\TaskManager\Task\Task;
+use AppBuilder\Application\Utils\FileManager\FileManagerService;
 use FileNotFoundException;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Model\ValueObject\Ticket;
-use Pvg\Application\Module\TaskManager\Exception\MisguidedTaskException;
-use Pvg\Application\Module\TaskManager\Task\NoActionTask;
-use Pvg\Application\Module\TaskManager\Task\Task;
 
 class TaskFactory
 {
@@ -20,12 +21,17 @@ class TaskFactory
     /** @var Parameters */
     private $applicationParams;
 
+    /** @var FileManagerService */
+    private $fileManager;
+
     public function __construct(
         LoggerInterface $logger,
-        Parameters $applicationParams
+        Parameters $applicationParams,
+        FileManagerService $fileManager
     ) {
         $this->logger            = $logger;
         $this->applicationParams = $applicationParams;
+        $this->fileManager       = $fileManager;
     }
 
     public function create(Ticket $ticket) : Task
@@ -56,7 +62,7 @@ class TaskFactory
     {
         return [
             new CreateTicketDirTaskFactory(),
-            new RemoveDoneTicketTaskFactory(),
+            new RemoveFinishedTicketTaskFactory(),
             new UpdateTicketTaskFactory(),
         ];
     }
@@ -69,7 +75,7 @@ class TaskFactory
         foreach ($factoriesByPriority as $currentPriorityFactories) {
             foreach ($currentPriorityFactories as $factory) {
                 try {
-                    return $factory->create($ticket, $this->applicationParams);
+                    return $factory->create($ticket, $this->applicationParams, $this->fileManager);
                 } catch (MisguidedTaskException $exception) {
                     continue;
                 } catch (FileNotFoundException $exception) {

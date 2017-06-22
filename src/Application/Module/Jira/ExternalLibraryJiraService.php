@@ -2,19 +2,22 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\Jira;
+namespace AppBuilder\Application\Module\Jira;
 
+use AppBuilder\Application\Module\HttpClient\ExternalLibraryHttpClient;
+use AppBuilder\Application\Module\Jira\Exception\InvalidJiraStatusException;
+use AppBuilder\Application\Module\Jira\Exception\NullResultReturned;
+use AppBuilder\Application\Module\Jira\ValueObject\JiraTicketStatus;
+use AppBuilder\Application\Utils\Mapper\Factory\JiraMapperFactory;
+use AppBuilder\Event\Application\ApplicationInitializedEvent;
+use AppBuilder\Event\Application\ApplicationInitializedEventAware;
+use AppBuilder\Event\Application\JiraTicketMappedEvent;
+use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Psr7\Response;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
-use Pvg\Application\Module\Jira\Exception\InvalidJiraStatusException;
-use Pvg\Application\Module\Jira\Exception\NullResultReturned;
-use Pvg\Application\Module\Jira\ValueObject\JiraTicketStatus;
-use Pvg\Application\Utils\Mapper\Factory\JiraMapperFactory;
-use Pvg\Event\Application\ApplicationInitializedEvent;
-use Pvg\Event\Application\ApplicationInitializedEventAware;
-use Pvg\Event\Application\JiraTicketMappedEvent;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ExternalLibraryJiraService implements JiraService, ApplicationInitializedEventAware
@@ -52,7 +55,7 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
         if ($this->validateCredentials()) {
             try {
                 $this->fetchAllTickets();
-            } catch (NullResultReturned $exception) {
+            } catch (Exception $exception) {
                 $this->logger->warning($exception->getMessage(), [$exception]);
             }
         }
@@ -87,6 +90,7 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
      * Fetches tickets with passed status and passes them to flattenArray method.
      *
      * @throws NullResultReturned
+     * @throws RuntimeException
      */
     public function fetchTicketsByStatus(string $status) : void
     {
@@ -100,9 +104,8 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
                             ->queryRepository
                             ->fetchTicketsByStatus(JiraTicketStatus::createFromString($status)->status()))
                 );
-            $this->logger->info('Tickets fetched.');
 
-            $tickets = json_decode($response->getBody()->getContents(), true);
+            $tickets = $this->getResponseContent($response);
         } catch (InvalidJiraStatusException $exception) {
             $this->logger->warning('Error: ' . $exception->getMessage(), [$exception]);
         }
@@ -110,6 +113,7 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
         if (null === $tickets) {
             throw new NullResultReturned('Error. Fetching method returned null');
         }
+
         $this->flattenArray($tickets);
     }
 
@@ -117,6 +121,7 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
      * Fetches all tickets and passes them to flattenArray method.
      *
      * @throws NullResultReturned
+     * @throws RuntimeException
      */
     public function fetchAllTickets() : void
     {
@@ -128,13 +133,28 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
                         ->queryRepository
                         ->fetchAllTickets())
             );
-        $tickets = json_decode($response->getBody()->getContents(), true);
+
+        $tickets = $this->getResponseContent($response);
+
+        if (null === $tickets) {
+            throw new NullResultReturned('Error. Jira fetching method returned null');
+        }
+
+        $this->flattenArray($tickets);
+    }
+
+    /**
+     * Gets content from response and decodes it into array.
+     *
+     * @throws RuntimeException
+     */
+    private function getResponseContent(Response $response) : ?array
+    {
+        $content = $response->getBody()->getContents();
 
         $this->logger->info('Tickets fetched.');
-        if (null === $tickets) {
-            throw new NullResultReturned('Error. Fetching method returned null');
-        }
-        $this->flattenArray($tickets);
+
+        return json_decode($content, true);
     }
 
     /**

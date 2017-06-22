@@ -2,12 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\TaskManager\Factory;
+namespace AppBuilder\Application\Module\TaskManager\Factory;
 
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Model\ValueObject\Ticket;
-use Pvg\Application\Module\TaskManager\Exception\MisguidedTaskException;
-use Pvg\Application\Module\TaskManager\Task\RemoveDoneTicketTask;
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Model\ValueObject\Ticket;
+use AppBuilder\Application\Module\TaskManager\Exception\MisguidedTaskException;
+use AppBuilder\Application\Module\TaskManager\Task\RemoveDoneTicketTask;
+use AppBuilder\Application\Utils\FileManager\FileManagerService;
 
 class RemoveDoneTicketTaskFactory
 {
@@ -20,13 +21,16 @@ class RemoveDoneTicketTaskFactory
      *
      * @throws MisguidedTaskException
      */
-    public function create(Ticket $ticket, Parameters $applicationParams) : RemoveDoneTicketTask
-    {
+    public function create(
+        Ticket $ticket,
+        Parameters $applicationParams,
+        FileManagerService $fileManager
+    ) : RemoveDoneTicketTask {
         if (!$this->existsAndIsDone($ticket)) {
             throw new MisguidedTaskException(RemoveDoneTicketTask::class);
         }
 
-        return new RemoveDoneTicketTask($ticket, $applicationParams);
+        return new RemoveDoneTicketTask($ticket, $applicationParams, $fileManager);
     }
 
     /**

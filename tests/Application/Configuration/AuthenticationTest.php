@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Tests\Application\Configuration;
 
+use AppBuilder\Application\Configuration\JiraAuthentication;
 use PHPUnit\Framework\TestCase;
-use Pvg\Application\Configuration\JiraAuthentication;
 
 /**
- * @covers \Pvg\Application\Configuration\JiraAuthentication
+ * @covers \AppBuilder\Application\Configuration\JiraAuthentication
  */
 class JiraAuthenticationTest extends TestCase
 {

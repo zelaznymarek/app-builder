@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\Jira;
+namespace AppBuilder\Application\Module\Jira;
 
 interface JiraService
 {

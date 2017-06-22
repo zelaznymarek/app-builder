@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Utils\Mapper;
+namespace AppBuilder\Application\Utils\Mapper;
 
 use Closure;
 

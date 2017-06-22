@@ -2,13 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace Pvg\Application\Module\BitBucket\Factory;
+namespace AppBuilder\Application\Module\BitBucket\Factory;
 
+use AppBuilder\Application\Configuration\ValueObject\Parameters;
+use AppBuilder\Application\Module\BitBucket\ExternalLibraryBitBucketService;
+use AppBuilder\Application\Module\HttpClient\ExternalLibraryHttpClient;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Pvg\Application\Configuration\ValueObject\Parameters;
-use Pvg\Application\Module\BitBucket\ExternalLibraryBitBucketService;
-use Pvg\Application\Module\HttpClient\ExternalLibraryHttpClient;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class BitBucketServiceFactory
@@ -21,7 +21,7 @@ class BitBucketServiceFactory
         return new ExternalLibraryBitBucketService(
             new ExternalLibraryHttpClient(
                 new Client(['base_uri' => $applicationParams->jiraHost()]),
-                    $applicationParams
+                $applicationParams
             ),
             $logger,
             $dispatcher
