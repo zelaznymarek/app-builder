@@ -9,18 +9,16 @@ use AppBuilder\Application\Module\Jira\Exception\InvalidJiraStatusException;
 use AppBuilder\Application\Module\Jira\Exception\NullResultReturned;
 use AppBuilder\Application\Module\Jira\ValueObject\JiraTicketStatus;
 use AppBuilder\Application\Utils\Mapper\Factory\JiraMapperFactory;
-use AppBuilder\Event\Application\ApplicationInitializedEvent;
-use AppBuilder\Event\Application\ApplicationInitializedEventAware;
+use AppBuilder\Event\Application\CredentialsValidatedEvent;
+use AppBuilder\Event\Application\CredentialsValidatedEventAware;
 use AppBuilder\Event\Application\JiraTicketMappedEvent;
 use Exception;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Psr7\Response;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class ExternalLibraryJiraService implements JiraService, ApplicationInitializedEventAware
+class ExternalLibraryJiraService implements JiraService, CredentialsValidatedEventAware
 {
     /** @var ExternalLibraryHttpClient */
     private $httpClient;
@@ -50,39 +48,12 @@ class ExternalLibraryJiraService implements JiraService, ApplicationInitializedE
      * Service connects to JIRA with specified credentials when event occurs.
      * If connected successfully, fetches all tickets from JIRA.
      */
-    public function onApplicationInitialized(ApplicationInitializedEvent $event = null) : void
-    {
-        if ($this->validateCredentials()) {
-            try {
-                $this->fetchAllTickets();
-            } catch (Exception $exception) {
-                $this->logger->warning($exception->getMessage(), [$exception]);
-            }
-        }
-    }
-
-    /**
-     * Method uses provided credentials to connect JIRA.
-     * If successful returns true. If credentials are invalid.
-     * JiraException is thrown.
-     */
-    public function validateCredentials() : bool
+    public function onCredentialsValidated(CredentialsValidatedEvent $event = null) : void
     {
         try {
-            $this->httpClient->request(
-                ExternalLibraryHttpClient::GET,
-                $this->createUrl($this->queryRepository->validateCredentials())
-            );
-
-            return true;
-        } catch (ClientException $exception) {
-            $this->logger->warning('Invalid login or password');
-
-            return false;
-        } catch (ConnectException $exception) {
-            $this->logger->warning('Invalid host');
-
-            return false;
+            $this->fetchAllTickets();
+        } catch (Exception $exception) {
+            $this->logger->warning($exception->getMessage(), [$exception]);
         }
     }
 

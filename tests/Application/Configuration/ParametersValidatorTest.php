@@ -12,9 +12,9 @@ use org\bovigo\vfs\vfsStreamWrapper;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \AppBuilder\Application\Configuration\ValueObject\Parameters
+ * @covers \AppBuilder\Application\Configuration\ParametersValidator
  */
-class ParametersTest extends TestCase
+class ParametersValidatorTest extends TestCase
 {
     protected function setUp() : void
     {

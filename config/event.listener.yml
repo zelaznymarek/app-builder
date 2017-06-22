@@ -1,5 +1,8 @@
 application.initialized:
-  - {service: app.jira_service, action: onApplicationInitialized}
+  - {service: app.authentication_service, action: onApplicationInitialized}
+
+credentials.validated:
+  - {service: jira_service, action: onCredentialsValidated}
 
 jira.ticket.mapped:
   - {service: app.bitbucket_service, action: onJiraTicketMapped}

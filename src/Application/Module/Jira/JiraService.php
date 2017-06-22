@@ -7,11 +7,6 @@ namespace AppBuilder\Application\Module\Jira;
 interface JiraService
 {
     /**
-     * Returns true if credentials are validated successfully. Throws exception if not.
-     */
-    public function validateCredentials() : bool;
-
-    /**
      *  Method fetches tickets with given status and dispatches event.
      */
     public function fetchTicketsByStatus(string $status) : void;

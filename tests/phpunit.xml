@@ -37,6 +37,7 @@
                 <directory suffix=".php">../src/Application/Module/TicketAggregate/Factory</directory>
                 <directory suffix=".php">../src/Event</directory>
                 <directory suffix=".php">../src/Application/Utils/Mapper/Factory</directory>
+                <directory suffix=".php">../src/Application/Configuration/Factory</directory>
             </exclude>
         </whitelist>
     </filter>

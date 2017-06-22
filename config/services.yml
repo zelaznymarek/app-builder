@@ -4,6 +4,20 @@ parameters:
   application.config: "@=service('app.configuration').get()"
 
 services:
+  app.authentication_service_factory:
+    class: \AppBuilder\Application\Configuration\Factory\AuthenticationServiceFactory
+    public: false
+
+  app.authentication_service:
+    class: \AppBuilder\Application\Configuration\AuthenticationService
+    factory: 'app.authentication_service_factory:create'
+    arguments:
+      - "@app.parameters"
+      - "@app.query_repository"
+      - "@app.file_manager"
+      - "@app.logger"
+      - "@app.event_dispatcher"
+
   app.bitbucket_service_factory:
     class: \AppBuilder\Application\Module\BitBucket\Factory\BitBucketServiceFactory
     public: false
