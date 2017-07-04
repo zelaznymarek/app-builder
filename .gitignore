@@ -1,0 +1,10 @@
+/bin/
+/config/parameters.yml
+/vendor/
+/jira-rest-client.log
+/tests/Application/Module/jira-rest-client.log
+/var/*
+!/var/cache/
+/var/cache/*
+!var/cache/.gitkeep
+/LICENSE.md

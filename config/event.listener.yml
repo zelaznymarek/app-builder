@@ -1,0 +1,19 @@
+application.initialized:
+  - {service: app.authentication_service, action: onApplicationInitialized}
+
+credentials.validated:
+  - {service: jira_service, action: onCredentialsValidated}
+
+jira.ticket.mapped:
+  - {service: app.bitbucket_service, action: onJiraTicketMapped}
+  - {service: app.existing_tickets_index_service, action: onJiraTicketMapped}
+  - {service: app.ticket_service_repository, action: onJiraTicketMapped}
+
+bitbucket.ticked.mapped:
+  - {service: app.ticket_service_repository, action: onBitbucketTicketMapped}
+
+ticket.dir.indexed:
+  - {service: app.ticket_service_repository, action: onTicketDirIndexed}
+
+full.ticket.built:
+  - {service: app.task_manager_service, action: onFullTicketBuilt}

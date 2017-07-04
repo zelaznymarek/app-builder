@@ -1,0 +1,123 @@
+parameters:
+  parameters.path: "config/parameters.yml"
+  event.listener.config.path: "config/event.listener.yml"
+  application.config: "@=service('app.configuration').get()"
+
+services:
+  app.authentication_service_factory:
+    class: \AppBuilder\Application\Configuration\Factory\AuthenticationServiceFactory
+    public: false
+
+  app.authentication_service:
+    class: \AppBuilder\Application\Configuration\AuthenticationService
+    factory: 'app.authentication_service_factory:create'
+    arguments:
+      - "@app.parameters"
+      - "@app.query_repository"
+      - "@app.file_manager"
+      - "@app.logger"
+      - "@app.event_dispatcher"
+
+  app.bitbucket_service_factory:
+    class: \AppBuilder\Application\Module\BitBucket\Factory\BitBucketServiceFactory
+    public: false
+
+  app.bitbucket_service:
+    class: \AppBuilder\Application\Module\BitBucket\ExternalLibraryBitBucketService
+    factory: 'app.bitbucket_service_factory:create'
+    arguments:
+      - "@app.parameters"
+      - "@app.logger"
+      - "@app.event_dispatcher"
+
+  app.configuration:
+    class: \AppBuilder\Application\Configuration\ConfigReader
+    arguments:
+      - "@app.file_locator"
+      - "%parameters.path%"
+      - "%event.listener.config.path%"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+    calls:
+      - method: init
+
+  app.existing_tickets_index_service_factory:
+    class: \AppBuilder\Application\Module\ExistingTicketsIndex\Factory\ExistingTicketsIndexServiceFactory
+    public: false
+
+  app.existing_tickets_index_service:
+    class: \AppBuilder\Application\Module\ExistingTicketsIndex\ExistingTicketsIndexService
+    factory: 'app.existing_tickets_index_service_factory:create'
+    arguments:
+      - "@app.parameters"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+
+  app.file_manager:
+    class: \AppBuilder\Application\Utils\FileManager\FileManagerService
+    arguments:
+      - "@app.logger"
+    public: false
+
+  app.full_ticket_builder:
+    class: \AppBuilder\Application\Module\TicketAggregate\FullTicket
+    public: false
+
+  app.jira_service_factory:
+    class: \AppBuilder\Application\Module\Jira\Factory\JiraServiceFactory
+    public: false
+
+  app.jira_service:
+    class: \AppBuilder\Application\Module\Jira\ExternalLibraryJiraService
+    factory: 'app.jira_service_factory:create'
+    arguments:
+      - "@app.parameters"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+      - "@app.query_repository"
+
+  app.logger:
+    class: \SimpleLogger\Stdout
+
+  app.parameters:
+    class: \AppBuilder\Application\Configuration\ValueObject\Parameters
+    arguments:
+      - "%application.config%"
+
+  app.task_factory:
+    class: \AppBuilder\Application\Module\TaskManager\Factory\TaskFactory
+    arguments:
+      - "@app.logger"
+      - "@app.parameters"
+      - "@app.file_manager"
+    public: false
+
+  app.task_manager_service:
+    class: \AppBuilder\Application\Module\TaskManager\TaskManagerService
+    arguments:
+      - "@app.task_factory"
+      - "@app.logger"
+      - "@app.event_dispatcher"
+
+  app.ticket_service_factory:
+    class: \AppBuilder\Application\Module\TicketAggregate\Factory\TicketServiceFactory
+    public: false
+
+  app.ticket_service_repository:
+    class: \AppBuilder\Application\Module\TicketAggregate\TicketServiceRepository
+    arguments:
+      - "@app.ticket_service_factory"
+      - "@app.full_ticket_builder"
+      - "@app.event_dispatcher"
+      - "@app.logger"
+
+  app.query_repository:
+      class: \AppBuilder\Application\Module\Jira\QueryRepository
+      public: false
+      
+  deploy_test_branch_command:
+    class: \AppBuilder\Command\DeployTestBranchCommand
+    arguments:
+      - "@app.parameters"
+      - "@app.logger"
+      - "@app.event_dispatcher"
